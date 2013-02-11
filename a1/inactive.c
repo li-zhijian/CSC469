@@ -6,7 +6,7 @@
 static uint64_t start = 0;
 
 void access_counter(unsigned *hi, unsigned *lo) {
-    asm volatile
+    __asm__ volatile
         ( "rdtsc; movl %%edx, %0; movl %%eax, %1" /* format string */
         : "=r" (*hi), "=r" (*lo) /* output list */
         : /* no inputs */

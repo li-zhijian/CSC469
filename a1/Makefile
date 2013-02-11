@@ -1,6 +1,6 @@
 CC = gcc
 CCFLAGS = -Wall -g -std=c99 -pedantic
-TARGETS = inactive
+TARGETS = trace
 
 ## Project Build
 .PHONY: all clean

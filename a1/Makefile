@@ -1,5 +1,6 @@
 CC = gcc
-CCFLAGS = -Wall -g -std=c99 -pedantic -lrt
+CCFLAGS = -Wall -g -std=c99 -pedantic
+LIBS = -lrt
 TARGETS = trace
 
 ## Project Build
@@ -8,7 +9,7 @@ TARGETS = trace
 all: $(TARGETS)
 
 %: %.c
-	$(CC) -o $@ $(CCFLAGS) $^
+	$(CC) -o $@ $(CCFLAGS) $^ $(LIBS)
 
 clean:
 	rm -rf $(TARGETS)

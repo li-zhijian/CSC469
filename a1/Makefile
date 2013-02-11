@@ -1,5 +1,5 @@
 CC = gcc
-CCFLAGS = -Wall -g -std=c99 -pedantic
+CCFLAGS = -Wall -g -std=c99 -pedantic -lrt
 TARGETS = trace
 
 ## Project Build

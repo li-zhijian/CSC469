@@ -1,5 +1,8 @@
+#define _POSIX_C_SOURCE 199309L
+
 #include <stdio.h>
 #include <stdint.h>
+#include <time.h>
 
 // http://www.cdf.toronto.edu/~csc469h/winter/assignments/a1/a1.shtml
 
@@ -31,6 +34,7 @@ uint64_t inactive_periods(int num, uint64_t theshold, uint64_t *samples) {
 }
 
 int main(int argc, char const *argv[]) {
-    start_counter();
-    printf("%llu\n", get_counter());
+    struct timespec res;
+    clock_getres(CLOCK_REALTIME, &res);
+    printf("Clock Resolution: %lds %ldns\n", res.tv_sec, res.tv_nsec);
 }

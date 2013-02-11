@@ -5,7 +5,7 @@
 
 static uint64_t start = 0;
 
-void access_counter(unsigned *hi, unsigned *lo) {
+static inline void access_counter(unsigned *hi, unsigned *lo) {
     __asm__ volatile
         ( "rdtsc; movl %%edx, %0; movl %%eax, %1" /* format string */
         : "=r" (*hi), "=r" (*lo) /* output list */
@@ -27,6 +27,7 @@ uint64_t get_counter() {
 
 uint64_t inactive_periods(int num, uint64_t theshold, uint64_t *samples) {
     // TODO
+    return 0;
 }
 
 int main(int argc, char const *argv[]) {

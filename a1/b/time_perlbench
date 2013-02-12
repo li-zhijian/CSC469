@@ -1,0 +1,75 @@
+#!/bin/bash
+
+# Execute with "env - ./time_perlbench". Bash throws an error on trying to use
+# "/usr/bin/env - /bin/bash" as the interpreter.
+
+if [[ -z "$1" ]]; then
+    echo "USAGE: $0 <2 or 3>"
+    exit 1
+fi
+
+ENV_SIZE=0
+if [[ -n "$2" ]]; then
+    ENV_SIZE="$2"
+fi
+
+TIME="/usr/bin/time"
+
+PB_DIR="perlbench" # Directory containing the perlbench-related data
+
+PB_O2="$PB_DIR/src/perlbench-O2"    # Path to the O2 executable
+PB_O3="$PB_DIR/src/perlbench-O3"    # Path to the O3 executable
+
+ALL_DIR="$PB_DIR/data/all/input"      # Directory containing the "all" input
+                                      # data
+TRAIN_DIR="$PB_DIR/data/train/input"  # Directory containing the "train"
+                                      # input data
+LIB_DIR="$PWD/$ALL_DIR/lib"
+
+if [[ "$1" -eq 2 ]]; then
+    pb="$PB_O2"
+else
+    pb="$PB_O3"
+fi
+
+# Change environment size
+ENV_VAR=""
+for (( i = 0; i < "$ENV_SIZE"; i++ )); do
+    ENV_VAR="x$ENV_VAR"
+done
+
+if [[ "$ENV_SIZE" -gt 0 ]]; then
+    export ENV_VAR
+fi
+
+pb="$PWD/$pb"
+for infile in "$TRAIN_DIR"/*.in; do
+    infile="$PWD/$infile" # Get absolute path
+
+    # For each input file, determine which directory contains the
+    # corresponding pl file and cd into it
+    plfile=$(basename "$infile" .in).pl
+    if [[ -f "$TRAIN_DIR/$plfile" ]]; then
+        pushd "$TRAIN_DIR" >/dev/null
+    else
+        pushd "$ALL_DIR" >/dev/null
+    fi
+
+    if [[ $plfile == "scrabbl.pl" ]]; then
+        # Pipe input for scrabbl
+        "$TIME" -f "%E,%U,%S" \
+            "$pb" -I"$LIB_DIR" \
+            "$plfile" < "$infile" 2>&1 >/dev/null
+    else
+        # Pass uncommented args to program.
+        grep -v '^#' "$infile" | while read args; do
+            if [[ -n "$args" ]]; then
+                "$TIME" -f "%E,%U,%S" \
+                    "$pb" -I"$LIB_DIR" \
+                    "$plfile" $args 2>&1 >/dev/null
+            fi
+        done
+    fi
+
+    popd >/dev/null
+done

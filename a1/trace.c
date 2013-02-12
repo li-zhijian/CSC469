@@ -42,7 +42,6 @@ int main(int argc, char const *argv[]) {
     /* Get CPU frequency by sleeping for SLEEP_SAMPLES times */
     struct timespec sleepTime = { 0, SLEEP_NSEC };
     uint64_t sleepSamples[SLEEP_SAMPLES];
-    uint64_t start = 0, current = 0;
 
     /**
      *  As long as we don't go over 10 seconds of combined sleep time
@@ -50,20 +49,19 @@ int main(int argc, char const *argv[]) {
      */
     uint64_t cyclePerMSec = 0;
 
-    start_counter();
     for(uint64_t i = 0; i < SLEEP_SAMPLES;) {
         __asm__ volatile ( "cpuid;" );
         /* do some busy waiting */
-        for(uint64_t j = 0; j < 1E8; j++);
+        for(uint64_t j = 0; j < 1E7; j++);
 
-        start = get_counter();
+        start_counter();
         if(nanosleep(&sleepTime, NULL) == 0) {
-            current = get_counter();
-            sleepSamples[i++] = current - start;
-            cyclePerMSec += sleepSamples[i-1];
+            sleepSamples[i] = get_counter();
+            cyclePerMSec += sleepSamples[i++];
         }
     }
     cyclePerMSec = cyclePerMSec / SLEEP_SAMPLES;
+
 
     printf("Clock Resolution: %lds %ldns\n", res.tv_sec, res.tv_nsec);
     printf("Clock Speed: %.2Lf GHz\n", cyclePerMSec / SLEEP_NSEC);

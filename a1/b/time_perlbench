@@ -14,6 +14,7 @@ if [[ -n "$2" ]]; then
 fi
 
 TIME="/usr/bin/time"
+PERF="/usr/bin/perf"
 
 PB_DIR="perlbench" # Directory containing the perlbench-related data
 
@@ -42,6 +43,12 @@ if [[ "$ENV_SIZE" -gt 0 ]]; then
     export ENV_VAR
 fi
 
+function do_perf {
+    "$PERF" stat -e cycles -e branches -e cache-references \
+        "$@" 2>&1 1>/dev/null | tail -n-6 | grep -v '^$' | \
+        perl -pe 's/^ *(.+?)  (.+?) *$/\1,\2/; s/ +/-/g'
+}
+
 pb="$PWD/$pb"
 for infile in "$TRAIN_DIR"/*.in; do
     infile="$PWD/$infile" # Get absolute path
@@ -57,16 +64,23 @@ for infile in "$TRAIN_DIR"/*.in; do
 
     if [[ $plfile == "scrabbl.pl" ]]; then
         # Pipe input for scrabbl
-        "$TIME" -f "%E,%U,%S" \
+        # "$TIME" -f "%E,%U,%S" \
+        #     "$pb" -I"$LIB_DIR" \
+        #     "$plfile" < "$infile" 2>&1 >/dev/null
+        do_perf \
             "$pb" -I"$LIB_DIR" \
-            "$plfile" < "$infile" 2>&1 >/dev/null
+            "$plfile" < "$infile"
     else
         # Pass uncommented args to program.
         grep -v '^#' "$infile" | while read args; do
             if [[ -n "$args" ]]; then
-                "$TIME" -f "%E,%U,%S" \
+                do_perf \
                     "$pb" -I"$LIB_DIR" \
-                    "$plfile" $args 2>&1 >/dev/null
+                    "$plfile" $args
+
+                # "$TIME" -f "%E,%U,%S" \
+                #     "$pb" -I"$LIB_DIR" \
+                #     "$plfile" $args 2>&1 >/dev/null
             fi
         done
     fi

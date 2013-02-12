@@ -15,19 +15,23 @@ were executed under this set up.
 
   [Vagrant]: http://www.vagrantup.com/
 
-Experiments
-===========
+Experiment
+==========
 
 We first ran both versions of all 3 test programs on the sample data
 with an empty environment to get a baseline. The total execution time
 for each test program version on all the input was:
 
-  Test Program   Total User Time (O2)   Total User Time (O3)
-  -------------- ---------------------- ----------------------
-  `bzip2`        77.59                  78.86
-  `lbm`          120.12                 121.38
-  `perlbench`    36.23                  35.95
+  Test Program   Total Time (O2)   Total Time (O3)   Improvement (O2/O3)
+  -------------- ----------------- ----------------- ---------------------
+  `bzip2`        77.59             78.86             0.983
+  `lbm`          120.12            121.38            0.989
+  `perlbench`    36.23             35.95             1.007
 
-  : Total running times on the train data
+  : Baseline with empty environments
 
+As shown in the table, with an empty environment, only the `perlbench`
+test showed performance improvement on going from O2 to O3.
 
+With this baseline to compare against, we ran each experiment with
+increasing environment sizes.

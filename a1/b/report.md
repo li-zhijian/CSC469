@@ -17,14 +17,19 @@ for each test program version on all the input was:
 
   Test Program   Total Time (O2)   Total Time (O3)   Improvement (O2/O3)
   -------------- ----------------- ----------------- ---------------------
-  `bzip2`        77.59             78.86             0.983
-  `lbm`          120.12            121.38            0.989
-  `perlbench`    36.23             35.95             1.007
+  `bzip2`        66.70             69.09             0.965
+  `lbm`          204.50            204.08            1.002
+  `perlbench`    29.81             29.68             1.004
 
   : Baseline with empty environments
 
-As shown in the table, with an empty environment, only the `perlbench`
-test showed performance improvement on going from O2 to O3.
+As shown in the table, `bzip2` actually had a performance degradation
+going from O2 to O3.
 
-With this baseline to compare against, we ran each experiment with
-increasing environment sizes.
+With this baseline to compare against, we began running each experiment
+with varying environment sizes.
+
+A major automation issue encountered here was that if `perf` was running
+inside a "piped environment", that is, if the `perf` command was a level
+or two deep inside a bash pipe, it failed with the error, `Failed
+opening logfd: Invalid argument`. 

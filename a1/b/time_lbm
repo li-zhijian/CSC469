@@ -13,6 +13,7 @@ if [[ -n "$2" ]]; then
     ENV_SIZE="$2"
 fi
 
+PERF="/u/csc469h/winter/pub/bin/perf"
 TIME="/usr/bin/time"
 LBM_O2="lbm/src/lbm-O2"
 LBM_O3="lbm/src/lbm-O3"
@@ -35,7 +36,8 @@ fi
 
 # lbm.in has only one entry. Hard code.
 
-"$TIME" -f "%E,%U,%S" \
+# "$TIME" -f "%E,%U,%S" \
+"$PERF" stat -x, -e cycles -e branches -e cache-references \
     "$lbm" 300 reference.dat 0 1 \
     lbm/data/train/input/100_100_130_cf_b.of \
     2>&1 >/dev/null

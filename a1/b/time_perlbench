@@ -58,22 +58,22 @@ for infile in "$TRAIN_DIR"/*.in; do
 
     if [[ $plfile == "scrabbl.pl" ]]; then
         # Pipe input for scrabbl
-        "$TIME" -f "%E,%U,%S" \
-            "$pb" -I"$LIB_DIR" \
-            "$plfile" < "$infile" 2>&1 >/dev/null
-        # "$PERF" stat -x, -e cycles -e branches -e cache-references \
+        # "$TIME" -f "%E,%U,%S" \
         #     "$pb" -I"$LIB_DIR" \
-        #     "$plfile" < "$infile"
+        #     "$plfile" < "$infile" 2>&1 >/dev/null
+        echo "$PERF" stat -x, -e cycles -e branches -e cache-references \
+            "$pb" -I"$LIB_DIR" \
+            "$plfile" < "$infile"
     else
         # Pass uncommented args to program.
         grep -v '^#' "$infile" | while read args; do
             if [[ -n "$args" ]]; then
-                # "$PERF" stat -x, -e cycles -e branches -e cache-references \
-                #     "$pb" -I"$LIB_DIR" \
-                #     "$plfile" $args
-                "$TIME" -f "%E,%U,%S" \
+                echo "$PERF" stat -x, -e cycles -e branches -e cache-references \
                     "$pb" -I"$LIB_DIR" \
-                    "$plfile" $args 2>&1 >/dev/null
+                    "$plfile" $args
+                # "$TIME" -f "%E,%U,%S" \
+                #     "$pb" -I"$LIB_DIR" \
+                #     "$plfile" $args 2>&1 >/dev/null
             fi
         done
     fi

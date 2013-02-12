@@ -1,7 +1,7 @@
 CC = gcc
 CCFLAGS = -Wall -g -std=c99 -pedantic
 LIBS = -lrt
-TARGETS = trace
+TARGETS = trace trace_context
 
 ## Project Build
 .PHONY: all clean

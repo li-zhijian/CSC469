@@ -1,4 +1,5 @@
 *.swp
 trace
+trace_context
 .cproject
 .project

@@ -31,5 +31,10 @@ with varying environment sizes.
 
 A major automation issue encountered here was that if `perf` was running
 inside a "piped environment", that is, if the `perf` command was a level
-or two deep inside a bash pipe, it failed with the error, `Failed
-opening logfd: Invalid argument`. 
+or two deep inside a bash pipe, it failed with the error,
+`Failed opening logfd: Invalid argument`. To add to that, there was no
+way of piping `perf` output to other commands -- it does not write to
+`stdout` or `stderr`. As per a [mailing list thread][], this is a bug
+that was recently fixed.
+
+  [mailing list thread]: http://linux-kernel.2935.n7.nabble.com/BUG-perf-annotate-broken-in-pipe-mode-td592974.html

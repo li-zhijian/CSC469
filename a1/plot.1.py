@@ -48,7 +48,10 @@ def trace(n):
     """
     # Drop the first four lines: the clock speed, the threshold, and the first
     # active/inactive pair.
-    for line in runcmd([TRACE, n]).splitlines()[4:]:
+    out = runcmd([TRACE, n])
+    with open("trace.out.txt", "w") as f:
+        f.write(out)
+    for line in out.splitlines()[4:]:
         if len(line.strip()) is 0:
             continue
         val = re.search(r'\(([\d\.]+) ms\) *$', line).group(1)

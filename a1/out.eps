@@ -1,9 +1,9 @@
 %!PS-Adobe-2.0 EPSF-2.0
 %%Title: out.eps
-%%Creator: gnuplot 4.4 patchlevel 3
-%%CreationDate: Tue Feb 12 06:55:32 2013
+%%Creator: gnuplot 4.6 patchlevel 1
+%%CreationDate: Tue Feb 12 10:35:49 2013
 %%DocumentFonts: (atend)
-%%BoundingBox: 50 50 211 138
+%%BoundingBox: 50 50 212 138
 %%EndComments
 %%BeginProlog
 /gnudict 256 dict def
@@ -20,10 +20,12 @@ gnudict begin
 /Level1 false def
 /Rounded false def
 /ClipToBoundingBox false def
+/SuppressPDFMark false def
 /TransparentPatterns false def
 /gnulinewidth 5.000 def
 /userlinewidth gnulinewidth def
 /Gamma 1.0 def
+/BackgroundColor {-1.000 -1.000 -1.000} def
 %
 /vshift -33 def
 /dl1 {
@@ -38,30 +40,14 @@ gnudict begin
 /vpt_ 31.5 def
 /hpt hpt_ def
 /vpt vpt_ def
-Level1 {} {
-/SDict 10 dict def
-systemdict /pdfmark known not {
-  userdict /pdfmark systemdict /cleartomark get put
-} if
-SDict begin [
-  /Title (out.eps)
-  /Subject (gnuplot plot)
-  /Creator (gnuplot 4.4 patchlevel 3)
-  /Author (g2abg)
-%  /Producer (gnuplot)
-%  /Keywords ()
-  /CreationDate (Tue Feb 12 06:55:32 2013)
-  /DOCINFO pdfmark
-end
-} ifelse
 /doclip {
   ClipToBoundingBox {
-    newpath 50 50 moveto 211 50 lineto 211 138 lineto 50 138 lineto closepath
+    newpath 50 50 moveto 212 50 lineto 212 138 lineto 50 138 lineto closepath
     clip
   } if
 } def
 %
-% Gnuplot Prolog Version 4.4 (August 2010)
+% Gnuplot Prolog Version 4.6 (September 2012)
 %
 %/SuppressPDFMark true def
 %
@@ -328,7 +314,8 @@ end
 /PatternFill {gsave /PFa [ 9 2 roll ] def
   PFa 0 get PFa 2 get 2 div add PFa 1 get PFa 3 get 2 div add translate
   PFa 2 get -2 div PFa 3 get -2 div PFa 2 get PFa 3 get Rec
-  gsave 1 setgray fill grestore clip
+  TransparentPatterns {} {gsave 1 setgray fill grestore} ifelse
+  clip
   currentlinewidth 0.5 mul setlinewidth
   /PFs PFa 2 get dup mul PFa 3 get dup mul add sqrt def
   0 0 M PFa 5 get rotate PFs -2 div dup translate
@@ -433,8 +420,26 @@ Level1 {Level1PatternFill} {Level2PatternFill} ifelse
 /Symbol-Oblique /Symbol findfont [1 0 .167 1 0 0] makefont
 dup length dict begin {1 index /FID eq {pop pop} {def} ifelse} forall
 currentdict end definefont pop
+Level1 SuppressPDFMark or 
+{} {
+/SDict 10 dict def
+systemdict /pdfmark known not {
+  userdict /pdfmark systemdict /cleartomark get put
+} if
+SDict begin [
+  /Title (out.eps)
+  /Subject (gnuplot plot)
+  /Creator (gnuplot 4.6 patchlevel 1)
+  /Author (abhinav)
+%  /Producer (gnuplot)
+%  /Keywords ()
+  /CreationDate (Tue Feb 12 10:35:49 2013)
+  /DOCINFO pdfmark
+end
+} ifelse
 end
 %%EndProlog
+%%Page: 1 1
 gnudict begin
 gsave
 doclip
@@ -443,6 +448,7 @@ doclip
 0 setgray
 newpath
 (Helvetica) findfont 100 scalefont setfont
+BackgroundColor 0 lt 3 1 roll 0 lt exch 0 lt or or not {BackgroundColor C 1.000 0 0 3240.00 1764.00 BoxColFill} if
 1.000 UL
 LTb
 150 320 M
@@ -453,60 +459,52 @@ LTb
 ( 0) Cshow
 1.000 UL
 LTb
-543 320 M
+586 320 M
 0 63 V
 0 1081 R
 0 -63 V
-543 220 M
-( 10) Cshow
+586 220 M
+( 100) Cshow
 1.000 UL
 LTb
-936 320 M
-0 63 V
-0 1081 R
-0 -63 V
-936 220 M
-( 20) Cshow
-1.000 UL
-LTb
-1329 320 M
+1022 320 M
 0 63 V
 0 1081 R
 0 -63 V
 0 -1181 R
-( 30) Cshow
+( 200) Cshow
 1.000 UL
 LTb
-1722 320 M
+1458 320 M
 0 63 V
 0 1081 R
 0 -63 V
 0 -1181 R
-( 40) Cshow
+( 300) Cshow
 1.000 UL
 LTb
-2116 320 M
+1895 320 M
 0 63 V
 0 1081 R
 0 -63 V
 0 -1181 R
-( 50) Cshow
+( 400) Cshow
 1.000 UL
 LTb
-2509 320 M
+2331 320 M
 0 63 V
 0 1081 R
 0 -63 V
 0 -1181 R
-( 60) Cshow
+( 500) Cshow
 1.000 UL
 LTb
-2902 320 M
+2767 320 M
 0 63 V
 0 1081 R
 0 -63 V
 0 -1181 R
-( 70) Cshow
+( 600) Cshow
 1.000 UL
 LTb
 1.000 UL
@@ -523,296 +521,213 @@ LCb setrgbcolor
 LTb
 1604 1614 M
 (Active and Inactive Periods) Cshow
-0.000 UP
 1.000 UL
 LTb
-1.00 0.00 0.00 C 1.000 150 434 146 1029 BoxColFill
+0.00 0.00 1.00 C 1.000 150 434 131 1029 BoxColFill
 LCb setrgbcolor
 150 434 M
 0 1029 V
-146 0 V
-296 434 L
--146 0 V
-0.000 UP
+131 0 V
+281 434 L
+-131 0 V
 stroke
 LTb
-1.00 0.00 0.00 C 1.000 296 434 146 1029 BoxColFill
+0.00 0.00 1.00 C 1.000 281 434 29 1029 BoxColFill
 LCb setrgbcolor
-296 434 M
+281 434 M
 0 1029 V
-146 0 V
-442 434 L
--146 0 V
-0.000 UP
+29 0 V
+310 434 L
+-29 0 V
 stroke
 LTb
-0.00 0.00 1.00 C 1.000 442 434 1 1029 BoxColFill
+0.00 0.00 1.00 C 1.000 310 434 161 1029 BoxColFill
 LCb setrgbcolor
-442 434 M
+310 434 M
 0 1029 V
-1 0 V
-443 434 L
--1 0 V
-0.000 UP
+161 0 V
+471 434 L
+-161 0 V
 stroke
 LTb
-1.00 0.00 0.00 C 1.000 443 434 146 1029 BoxColFill
+0.00 0.00 1.00 C 1.000 471 434 161 1029 BoxColFill
 LCb setrgbcolor
-443 434 M
+471 434 M
 0 1029 V
-146 0 V
-589 434 L
--146 0 V
-0.000 UP
+161 0 V
+632 434 L
+-161 0 V
 stroke
 LTb
-1.00 0.00 0.00 C 1.000 589 434 146 1029 BoxColFill
+0.00 0.00 1.00 C 1.000 632 434 161 1029 BoxColFill
 LCb setrgbcolor
-589 434 M
+632 434 M
 0 1029 V
-146 0 V
-735 434 L
--146 0 V
-0.000 UP
+161 0 V
+793 434 L
+-161 0 V
 stroke
 LTb
-1.00 0.00 0.00 C 1.000 735 434 146 1029 BoxColFill
+0.00 0.00 1.00 C 1.000 793 434 162 1029 BoxColFill
 LCb setrgbcolor
-735 434 M
+793 434 M
 0 1029 V
-146 0 V
-881 434 L
--146 0 V
-0.000 UP
+162 0 V
+955 434 L
+-162 0 V
 stroke
 LTb
-1.00 0.00 0.00 C 1.000 881 434 3 1029 BoxColFill
+0.00 0.00 1.00 C 1.000 955 434 161 1029 BoxColFill
 LCb setrgbcolor
-881 434 M
+955 434 M
 0 1029 V
-3 0 V
-884 434 L
--3 0 V
-0.000 UP
-stroke
-LTb
-0.00 0.00 1.00 C 1.000 884 434 1 1029 BoxColFill
-LCb setrgbcolor
-884 434 M
-0 1029 V
-1 0 V
-885 434 L
--1 0 V
-0.000 UP
-stroke
-LTb
-1.00 0.00 0.00 C 1.000 885 434 142 1029 BoxColFill
-LCb setrgbcolor
-885 434 M
-0 1029 V
-142 0 V
+161 0 V
 0 -1029 V
--142 0 V
-0.000 UP
+-161 0 V
 stroke
 LTb
-1.00 0.00 0.00 C 1.000 1027 434 146 1029 BoxColFill
+0.00 0.00 1.00 C 1.000 1116 434 161 1029 BoxColFill
 LCb setrgbcolor
-1027 434 M
+1116 434 M
 0 1029 V
-146 0 V
+161 0 V
 0 -1029 V
--146 0 V
-0.000 UP
+-161 0 V
 stroke
 LTb
-1.00 0.00 0.00 C 1.000 1173 434 103 1029 BoxColFill
+0.00 0.00 1.00 C 1.000 1277 434 161 1029 BoxColFill
 LCb setrgbcolor
-1173 434 M
+1277 434 M
 0 1029 V
-103 0 V
+161 0 V
 0 -1029 V
--103 0 V
-0.000 UP
+-161 0 V
 stroke
 LTb
-1.00 0.00 0.00 C 1.000 1276 434 43 1029 BoxColFill
+0.00 0.00 1.00 C 1.000 1438 434 161 1029 BoxColFill
 LCb setrgbcolor
-1276 434 M
+1438 434 M
 0 1029 V
-43 0 V
+161 0 V
 0 -1029 V
--43 0 V
-0.000 UP
+-161 0 V
 stroke
 LTb
-0.00 0.00 1.00 C 1.000 1319 434 1 1029 BoxColFill
+0.00 0.00 1.00 C 1.000 1599 434 161 1029 BoxColFill
 LCb setrgbcolor
-1319 434 M
+1599 434 M
+0 1029 V
+161 0 V
+0 -1029 V
+-161 0 V
+stroke
+LTb
+0.00 0.00 1.00 C 1.000 1760 434 161 1029 BoxColFill
+LCb setrgbcolor
+1760 434 M
+0 1029 V
+161 0 V
+0 -1029 V
+-161 0 V
+stroke
+LTb
+1.00 0.00 0.00 C 1.000 1921 434 1 1029 BoxColFill
+LCb setrgbcolor
+1921 434 M
 0 1029 V
 1 0 V
 0 -1029 V
 -1 0 V
-0.000 UP
 stroke
 LTb
-1.00 0.00 0.00 C 1.000 1320 434 146 1029 BoxColFill
+0.00 0.00 1.00 C 1.000 1922 434 161 1029 BoxColFill
 LCb setrgbcolor
-1320 434 M
+1922 434 M
 0 1029 V
-146 0 V
+161 0 V
 0 -1029 V
--146 0 V
-0.000 UP
+-161 0 V
 stroke
 LTb
-1.00 0.00 0.00 C 1.000 1466 434 146 1029 BoxColFill
+0.00 0.00 1.00 C 1.000 2083 434 161 1029 BoxColFill
 LCb setrgbcolor
-1466 434 M
+2083 434 M
 0 1029 V
-146 0 V
+161 0 V
 0 -1029 V
--146 0 V
-0.000 UP
+-161 0 V
 stroke
 LTb
-1.00 0.00 0.00 C 1.000 1612 434 146 1029 BoxColFill
+0.00 0.00 1.00 C 1.000 2244 434 161 1029 BoxColFill
 LCb setrgbcolor
-1612 434 M
+2244 434 M
 0 1029 V
-146 0 V
+161 0 V
 0 -1029 V
--146 0 V
-0.000 UP
+-161 0 V
 stroke
 LTb
-1.00 0.00 0.00 C 1.000 1758 434 146 1029 BoxColFill
+0.00 0.00 1.00 C 1.000 2405 434 161 1029 BoxColFill
 LCb setrgbcolor
-1758 434 M
+2405 434 M
 0 1029 V
-146 0 V
+161 0 V
 0 -1029 V
--146 0 V
-0.000 UP
+-161 0 V
 stroke
 LTb
-1.00 0.00 0.00 C 1.000 1904 434 146 1029 BoxColFill
+0.00 0.00 1.00 C 1.000 2566 434 161 1029 BoxColFill
 LCb setrgbcolor
-1904 434 M
+2566 434 M
 0 1029 V
-146 0 V
+161 0 V
 0 -1029 V
--146 0 V
-0.000 UP
+-161 0 V
 stroke
 LTb
-0.00 0.00 1.00 C 1.000 2050 434 1 1029 BoxColFill
+0.00 0.00 1.00 C 1.000 2727 434 161 1029 BoxColFill
 LCb setrgbcolor
-2050 434 M
+2727 434 M
 0 1029 V
-1 0 V
+161 0 V
 0 -1029 V
--1 0 V
-0.000 UP
+-161 0 V
 stroke
 LTb
-1.00 0.00 0.00 C 1.000 2051 434 146 1029 BoxColFill
+0.00 0.00 1.00 C 1.000 2888 434 140 1029 BoxColFill
 LCb setrgbcolor
-2051 434 M
-0 1029 V
-146 0 V
-0 -1029 V
--146 0 V
-0.000 UP
-stroke
-LTb
-1.00 0.00 0.00 C 1.000 2197 434 146 1029 BoxColFill
-LCb setrgbcolor
-2197 434 M
-0 1029 V
-146 0 V
-0 -1029 V
--146 0 V
-0.000 UP
-stroke
-LTb
-1.00 0.00 0.00 C 1.000 2343 434 5 1029 BoxColFill
-LCb setrgbcolor
-2343 434 M
-0 1029 V
-5 0 V
-0 -1029 V
--5 0 V
-0.000 UP
-stroke
-LTb
-0.00 0.00 1.00 C 1.000 2348 434 1 1029 BoxColFill
-LCb setrgbcolor
-2348 434 M
-0 1029 V
-1 0 V
-0 -1029 V
--1 0 V
-0.000 UP
-stroke
-LTb
-1.00 0.00 0.00 C 1.000 2349 434 140 1029 BoxColFill
-LCb setrgbcolor
-2349 434 M
+2888 434 M
 0 1029 V
 140 0 V
 0 -1029 V
 -140 0 V
-0.000 UP
 stroke
 LTb
-1.00 0.00 0.00 C 1.000 2489 434 146 1029 BoxColFill
+0.00 0.00 1.00 C 1.000 3028 434 27 1029 BoxColFill
 LCb setrgbcolor
-2489 434 M
+3028 434 M
 0 1029 V
-146 0 V
+27 0 V
 0 -1029 V
--146 0 V
-0.000 UP
+-27 0 V
 stroke
 LTb
-1.00 0.00 0.00 C 1.000 2635 434 146 1029 BoxColFill
+0.00 0.00 1.00 C 1.000 3055 434 2 1029 BoxColFill
 LCb setrgbcolor
-2635 434 M
+3055 434 M
 0 1029 V
-146 0 V
+2 0 V
 0 -1029 V
--146 0 V
-0.000 UP
+-2 0 V
 stroke
 LTb
-1.00 0.00 0.00 C 1.000 2781 434 146 1029 BoxColFill
+0.00 0.00 1.00 C 1.000 3057 434 1 1029 BoxColFill
 LCb setrgbcolor
-2781 434 M
-0 1029 V
-146 0 V
-0 -1029 V
--146 0 V
-0.000 UP
-stroke
-LTb
-0.00 0.00 1.00 C 1.000 2927 434 1 1029 BoxColFill
-LCb setrgbcolor
-2927 434 M
+3057 434 M
 0 1029 V
 1 0 V
 0 -1029 V
 -1 0 V
-0.000 UP
-stroke
-LTb
-1.00 0.00 0.00 C 1.000 2928 434 130 1029 BoxColFill
-LCb setrgbcolor
-2928 434 M
-0 1029 V
-130 0 V
-0 -1029 V
--130 0 V
 1.000 UP
 stroke
 LTb

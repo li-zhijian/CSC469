@@ -1,4 +1,4 @@
-% CSC469 Part B
+% CSC469 Assignment 1 (Part B)
 % Abhinav Gupta (998585963), Zeeshan Qureshi (997108954)
 % 11 Feb 2013
 
@@ -51,15 +51,15 @@ following table shows the total number of cycles it took `perlbench-O2`
 and `perlbench-O3` to execute on all their inputs under different
 environment sizes.
 
-    Environment Size    Cycles (O2)   Cycles (O3)   Improvement (O2/O3)
-    ----------------    -----------   -----------   -------------------
-    0                   70605781448   69989340427   1.0088
-    250                 70893587340   69807712968   1.0155
-    500                 70803423147   69832274573   1.0139
-    750                 70176850821   69138993949   1.0150
-    1000                69868997375   68717346336   1.0167
+  Environment Size   Cycles (O2)   Cycles (O3)   Improvement (O2/O3)
+  ------------------ ------------- ------------- ---------------------
+  0                  70605781448   69989340427   1.0088
+  250                70893587340   69807712968   1.0155
+  500                70803423147   69832274573   1.0139
+  750                70176850821   69138993949   1.0150
+  1000               69868997375   68717346336   1.0167
 
-    : Number of cycles it took to run all input through `perlbench`
+  : Number of cycles it took to run all input through `perlbench`
 
 There was a performance improvement in each case, ranging from `1.0088`
 to `1.0167`. However, there does not seem to be any direct correlation

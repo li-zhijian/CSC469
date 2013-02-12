@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 199309L
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <time.h>
@@ -35,6 +36,14 @@ uint64_t inactive_periods(int num, uint64_t theshold, uint64_t *samples) {
 }
 
 int main(int argc, char const *argv[]) {
+    if(argc != 2) {
+        printf("Usage: trace num_inactive\n");
+        return -1;
+    }
+
+    /* Parse arguments */
+    uint64_t num_inactive = strtoull(argv[1], NULL, 10);
+
     /* Get clock resolution */
     struct timespec res;
     clock_getres(CLOCK_REALTIME, &res);
@@ -61,7 +70,6 @@ int main(int argc, char const *argv[]) {
         }
     }
     cyclePerMSec = cyclePerMSec / SLEEP_SAMPLES;
-
 
     printf("Clock Resolution: %lds %ldns\n", res.tv_sec, res.tv_nsec);
     printf("Clock Speed: %.2Lf GHz\n", cyclePerMSec / SLEEP_NSEC);

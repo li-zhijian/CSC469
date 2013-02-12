@@ -75,6 +75,10 @@ int main(int argc, char const *argv[]) {
      */
     uint64_t cycles_per_msec = 0;
 
+    /**
+     * Determine CPU frequency by reading global time stamp counter
+     * after sleeping for a millisecond.
+     */
     for(uint64_t i = 0; i < SLEEP_SAMPLES;) {
         __asm__ volatile ( "cpuid;" );
         /* do some busy waiting */

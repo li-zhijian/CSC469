@@ -51,9 +51,9 @@ for infile in "$TRAIN_DIR"/*.in; do
     # corresponding pl file and cd into it
     plfile=$(basename "$infile" .in).pl
     if [[ -f "$TRAIN_DIR/$plfile" ]]; then
-        pushd "$TRAIN_DIR" >/dev/null
+        echo pushd "$TRAIN_DIR"
     else
-        pushd "$ALL_DIR" >/dev/null
+        echo pushd "$ALL_DIR"
     fi
 
     if [[ $plfile == "scrabbl.pl" ]]; then
@@ -63,7 +63,7 @@ for infile in "$TRAIN_DIR"/*.in; do
         #     "$plfile" < "$infile" 2>&1 >/dev/null
         echo "$PERF" stat -x, -e cycles -e branches -e cache-references \
             "$pb" -I"$LIB_DIR" \
-            "$plfile" < "$infile"
+            "$plfile < $infile"
     else
         # Pass uncommented args to program.
         grep -v '^#' "$infile" | while read args; do
@@ -78,5 +78,5 @@ for infile in "$TRAIN_DIR"/*.in; do
         done
     fi
 
-    popd >/dev/null
+    echo popd
 done

@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# Execute with "env - ./test_bzip". Bash throws an error on trying to use
+# "/usr/bin/env - /bin/bash" as the interpreter.
+
+if [[ -z "$1" ]]; then
+    echo "USAGE: $0 <2 or 3>"
+    exit 1
+fi
+
+ENV_SIZE=0
+if [[ -n "$2" ]]; then
+    ENV_SIZE="$2"
+fi
+
+TIME="/usr/bin/time"
+BZIP_DIR="bzip2" # Directory containing the bzip-related data
+
+BZIP_O2="$BZIP_DIR/src/bzip2-O2"    # Path to the O2 executable
+BZIP_O3="$BZIP_DIR/src/bzip2-O3"    # Path to the O3 executable
+
+ALL_DIR="$BZIP_DIR/data/all/input"      # Directory containing the "all" input
+                                        # data
+TRAIN_DIR="$BZIP_DIR/data/train/input"  # Directory containing the "train"
+                                        # input data
+
+CONTROL="$TRAIN_DIR/control" # File containing different executin parameters
+                             # for bzip2
+
+if [[ "$1" -eq 2 ]]; then
+    bzip="$BZIP_O2"
+else
+    bzip="$BZIP_O3"
+fi
+
+# Change environment size
+ENV_VAR=""
+for (( i = 0; i < "$ENV_SIZE"; i++ )); do
+    ENV_VAR="x$ENV_VAR"
+done
+
+if [[ "$ENV_SIZE" -gt 0 ]]; then
+    export ENV_VAR
+fi
+
+# For each line in control, exectue bzip2 with the correct input data.
+# echo "Elapsed,User,System"
+cat "$CONTROL" | while read args; do
+    file=`echo $args|cut -f1 -d' '`
+    n=`echo $args|cut -f2 -d' '`
+    if [[ -f "$TRAIN_DIR/$file" ]]; then
+        path="$TRAIN_DIR/$file"
+    else
+        path="$ALL_DIR/$file"
+    fi
+
+    "$TIME" -f "%E,%U,%S" "$bzip" "$path" "$n" 2>&1 >/dev/null
+done

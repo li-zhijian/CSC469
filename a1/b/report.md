@@ -4,19 +4,12 @@
 
 <!-- vim:set spell tw=72: -->
 
-Environment
-===========
-
-We used [Vagrant][] to set up an isolated Ubuntu 10.04 virtual machine
-with only 512 MB of RAM and a single CPU. Address Space Layout
-Randomization was disabled on the virtual machine. The host machine for
-the VM was running Mac OS X 10.7 with a Core 2 Duo CPU. All experiments
-were executed under this set up.
-
-  [Vagrant]: http://www.vagrantup.com/
-
 Experiment
 ==========
+
+All experiments were executed on CDF machines. We originally attempted
+the experiment on an Ubuntu virtual machine but it turned out that
+`perf` could not access the low level information it needed inside a VM.
 
 We first ran both versions of all 3 test programs on the sample data
 with an empty environment to get a baseline. The total execution time

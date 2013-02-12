@@ -18,5 +18,6 @@ were executed under this set up.
 Experiments
 ===========
 
-We first ran both versions of `bzip2` on the sample data with an empty
-environment to set up a baseline.
+We first ran both versions of all 3 test programs on the sample data
+with an empty environment to get a base line.
+

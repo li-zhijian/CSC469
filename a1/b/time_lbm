@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Execute with "env - ./test_bzip". Bash throws an error on trying to use
+# "/usr/bin/env - /bin/bash" as the interpreter.
+
+if [[ -z "$1" ]]; then
+    echo "USAGE: $0 <2 or 3>"
+    exit 1
+fi
+
+ENV_SIZE=0
+if [[ -n "$2" ]]; then
+    ENV_SIZE="$2"
+fi
+
+TIME="/usr/bin/time"
+LBM_O2="lbm/src/lbm-O2"
+LBM_O3="lbm/src/lbm-O3"
+
+if [[ "$1" -eq 2 ]]; then
+    lbm="$LBM_O2"
+else
+    lbm="$LBM_O3"
+fi
+
+# Change environment size
+ENV_VAR=""
+for (( i = 0; i < "$ENV_SIZE"; i++ )); do
+    ENV_VAR="x$ENV_VAR"
+done
+
+if [[ "$ENV_SIZE" -gt 0 ]]; then
+    export ENV_VAR
+fi
+
+# lbm.in has only one entry. Hard code.
+
+"$TIME" -f "%E,%U,%S" \
+    "$lbm" 300 reference.dat 0 1 \
+    lbm/data/train/input/100_100_130_cf_b.of \
+    2>&1 >/dev/null
+

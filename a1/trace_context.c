@@ -7,10 +7,16 @@
 #include <unistd.h>
 #include <time.h>
 
+#include <sys/wait.h>
+#include <fcntl.h>           /* For O_* constants */
+#include <sys/stat.h>        /* For mode constants */
+#include <mqueue.h>
+#include <errno.h>
+
 #define SLEEP_NSEC      1E6L  /* 1 millisecond = 10^6 nanoseconds */
 #define SLEEP_SAMPLES     5L
 #define THRESHOLD_NSEC  100L  /* 100 ns = Main Memory Reference */
-#define NUM_CHILDREN      50  /* Number of child processes to fork */
+#define NUM_CHILDREN     20  /* Number of child processes to fork */
 
 static inline void access_counter(unsigned *hi, unsigned *lo) {
     __asm__ volatile
@@ -98,15 +104,30 @@ int main(int argc, char const *argv[]) {
      */
     fflush(stdout);
 
+    /* Create Message Queue */
+    struct mq_attr attr;
+    attr.mq_maxmsg = NUM_CHILDREN + 1;
+    attr.mq_msgsize = 1;
+    attr.mq_flags = 0;
+    mqd_t parent_queue = mq_open("/testing", O_RDWR | O_CREAT, 0666, &attr);
+
     /* Fork children here and have them wait */
-    pid_t pid;
+    pid_t pid, pids[NUM_CHILDREN];
     for(int i = 0; i < NUM_CHILDREN; i++) {
-        pid = fork();
+        pids[i] = pid = fork();
         if(pid == 0) break;
     }
 
     if(pid == 0) {
         pid = getpid();
+
+        /* Wait for signal from parent */
+        struct timespec randSleep = {0, SLEEP_NSEC * rand()};
+        nanosleep(&randSleep, NULL);
+        char msg[8192];
+        while(mq_receive(parent_queue, msg, 1, NULL) == -1) {
+            // Wait for message from parent;
+        }
 
         /* Collect samples of inactive periods */
         uint64_t *samples = malloc(sizeof(uint64_t) * num_inactive * 2);
@@ -123,9 +144,25 @@ int main(int argc, char const *argv[]) {
             active_start = samples[2*i+1];
         }
 
-        /* Free up memory */
+        /* Free up memory and queues */
         free(samples);
+        mq_close(parent_queue);
 
         return 0;
     }
+
+    /* Signal children to start processing */
+    struct timespec sleepTime2 = { 0, SLEEP_NSEC * 10 };
+    nanosleep(&sleepTime2, NULL);
+    for(int i = 0; i < NUM_CHILDREN; i++) {
+        char msg[] = "message";
+        mq_send(parent_queue, msg, 1, 1);
+    }
+
+    for(int i = 0; i < NUM_CHILDREN; i++) {
+        wait(NULL);
+    }
+
+    mq_close(parent_queue);
+    mq_unlink("trace");
 }

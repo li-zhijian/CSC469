@@ -1,5 +1,4 @@
 import re
-import os
 import shlex
 import argparse
 import subprocess
@@ -26,13 +25,12 @@ def runcmd(args, stdin=None):
     if type(args) is str:
         args = shlex.split(args)
     args = map(str, args)
-    with open(os.devnull, 'w') as fnull:
-        proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=fnull,
-                                stdin=stdin)
-        if stdin is None:
-            return proc.stdout.read()
-        else:
-            return proc
+    proc = subprocess.Popen(args, stdout=subprocess.PIPE,
+                            stdin=stdin)
+    if stdin is None:
+        return proc.stdout.read()
+    else:
+        return proc
 
 
 def flipflop(it, state=True):
@@ -92,14 +90,20 @@ def main():
                      x2=end, y2=BAR_BOTTOM + BAR_HEIGHT,
                      color='blue' if is_active else 'red')
         draw = ('set object %(obj)d rect from %(x1)f, %(y1)f to '
-                '%(x2)f, %(y2)f, 2 fc rgb "%(color)s" fs solid\n') % props
+                '%(x2)f, %(y2)f, 2 fc rgb "%(color)s" fs solid '
+                '\n') % props
         gp.stdin.write(draw)
 
         obj += 1
         start = end
         maxend = max(end, maxend)
 
-    gp.stdin.write("plot [0:%d] [0:%d] 0" % (maxend, BAR_BOTTOM + BAR_HEIGHT))
+    props = dict(maxend=maxend, height=BAR_BOTTOM + BAR_HEIGHT)
+    scriptfoot = ('plot [0:%(maxend)d] [0:%(height)d] '
+                  '0 title "Active", '
+                  '0 title "Inactive"'
+                  '\n') % props
+    gp.stdin.write(dedent(scriptfoot))
     gp.stdin.close()
 
 if __name__ == '__main__':

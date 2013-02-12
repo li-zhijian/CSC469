@@ -43,12 +43,6 @@ if [[ "$ENV_SIZE" -gt 0 ]]; then
     export ENV_VAR
 fi
 
-function do_perf {
-    "$PERF" stat -e cycles -e branches -e cache-references \
-        "$@" 2>&1 1>/dev/null | tail -n-6 | grep -v '^$' | \
-        perl -pe 's/^ *(.+?)  (.+?) *$/\1,\2/; s/ +/-/g'
-}
-
 pb="$PWD/$pb"
 for infile in "$TRAIN_DIR"/*.in; do
     infile="$PWD/$infile" # Get absolute path
@@ -67,17 +61,16 @@ for infile in "$TRAIN_DIR"/*.in; do
         # "$TIME" -f "%E,%U,%S" \
         #     "$pb" -I"$LIB_DIR" \
         #     "$plfile" < "$infile" 2>&1 >/dev/null
-        do_perf \
+        "$PERF" stat -x, -e cycles -e branches -e cache-references \
             "$pb" -I"$LIB_DIR" \
             "$plfile" < "$infile"
     else
         # Pass uncommented args to program.
         grep -v '^#' "$infile" | while read args; do
             if [[ -n "$args" ]]; then
-                do_perf \
+                "$PERF" stat -x, -e cycles -e branches -e cache-references \
                     "$pb" -I"$LIB_DIR" \
                     "$plfile" $args
-
                 # "$TIME" -f "%E,%U,%S" \
                 #     "$pb" -I"$LIB_DIR" \
                 #     "$plfile" $args 2>&1 >/dev/null

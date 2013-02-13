@@ -112,9 +112,9 @@ int main(int argc, char const *argv[]) {
     mqd_t parent_queue = mq_open("/testing", O_RDWR | O_CREAT, 0666, &attr);
 
     /* Fork children here and have them wait */
-    pid_t pid, pids[NUM_CHILDREN];
+    pid_t pid;
     for(int i = 0; i < NUM_CHILDREN; i++) {
-        pids[i] = pid = fork();
+        pid = fork();
         if(pid == 0) break;
     }
 

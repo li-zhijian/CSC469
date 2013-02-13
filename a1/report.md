@@ -94,3 +94,61 @@ program are thus the timer interrupts by the scheduler and they
 constitute about 0.0016% of the total process time. Had we been doing
 other IO and disk based activity this time would've certainly been
 higher.
+
+Context Switches
+================
+
+Setup
+-----
+
+The setup was the same as the last experiment except that for this one
+we only ran the processes in `Runlevel 3` to get as little measuremet
+bias as possible.
+
+Experiment
+-----------------
+
+For measuring the context switch time between processes we first had the idea
+of modifying our existing trace utility to output the global TSC value rather
+than just the difference since the start of the process. This way we could
+run multiple processes on a system and trace their activities and merge it
+all together into a single ordering of events from which we can tell when
+a process was switched out with another.
+
+To do this, we initially had our trace process run, determine the CPU
+frequency and threshold then fork into 50 children with each of them
+vying for CPU time. For measuring context switches, we lowered the
+threshold from 1000ns to 10ns as that would be closer to how long it
+takes for a context switch (as referenced in Jeff Dean's talk). The problem
+with this approach was that by the time the 50th child started up, the first
+one would've finished its trace and thus there was very little contention 
+between the child processes.
+
+To increase contention between the children, we instead used a POSIX message
+queue to have all children start up and wait for the parent to give a go 
+signal so that they can start their trace. This helped increase context
+switching activity on the system and we got some meaningful data.
+
+
+Test Run
+--------
+
+We ran the test with 20 child processes and 25 inactive period 
+measurements per process.
+
+NOTE: The trace_context output is in the file tc.data.txt
+
+Conclusion
+----------
+
+A time slice is roughly about 5 msec.
+
+Yes, time slice goes down as number of processes goes up but not by a lot.
+
+Definitely! Didn't realize that the CPU was so fast, a 100 ns to switch
+between processes.
+
+As far as we were taught in 369, time slices were mostly allocated in round
+robin manner but over here scheduling policies and system load determine
+which thread gets a slice and which one doesn't, it isn't a fair game as
+made out to be in 369.

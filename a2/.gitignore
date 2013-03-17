@@ -1,0 +1,8 @@
+# Eclipse project files
+.project
+.cproject
+.settings
+
+# General
+*.pdf
+*.swp

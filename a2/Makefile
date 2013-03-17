@@ -6,6 +6,7 @@ all:
 	cd benchmarks/cache-thrash; make
 	cd benchmarks/threadtest; make
 	cd benchmarks/larson; make
+	cd tests; make
 
 clean:
 	cd util; make clean
@@ -14,4 +15,5 @@ clean:
 	cd benchmarks/cache-thrash; make clean
 	cd benchmarks/threadtest; make clean
 	cd benchmarks/larson; make clean
+	cd tests; make clean
 

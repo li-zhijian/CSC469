@@ -10,7 +10,7 @@ CC = gcc
 CC_FLAGS = -O3 -I$(INCLUDES) -L $(LIBDIR)
 CC_DBG_FLAGS = -g -I$(INCLUDES) -L $(LIBDIR)
 
-all: threadtest-kheap threadtest-cmu threadtest-libc
+all: threadtest-kheap threadtest-cmu threadtest-libc threadtest-hoard
 
 # Allocator based on OS/161 kheap
 
@@ -37,6 +37,11 @@ threadtest-libc: $(DEPENDS) $(TOPDIR)/allocators/alloclibs/libmmlibc.a
 
 threadtest-libc-dbg: $(DEPENDS_DBG) $(TOPDIR)/allocators/alloclibs/libmmlibc.a
 	$(CC) $(CC_DBG_FLAGS) -o $(@) threadtest.c $(TOPDIR)/allocators/alloclibs/libmmlibc.a -lmmutil_dbg -lpthread
+
+# Simplified Hoard Allocator
+threadtest-hoard: $(DEPENDS) $(TOPDIR)/allocators/alloclibs/libhoard.a
+	$(CC) $(CC_FLAGS) -o $(@) threadtest.c $(TOPDIR)/allocators/alloclibs/libhoard.a -lmmutil -lpthread
+
 
 # Cleanup
 clean:

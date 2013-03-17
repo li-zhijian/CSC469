@@ -4,7 +4,7 @@ CC_FLAGS = -c -Wall -fmessage-length=0 -pipe -O3 -finline-limit=65000 -fkeep-inl
 
 CC_DBG_FLAGS = -c -Wall -fmessage-length=0 -pipe -g -finline-limit=65000 -fkeep-inline-functions -finline-functions -ffast-math -fomit-frame-pointer -DNDEBUG -I. -I$(TOPDIR)/include -D_REENTRANT=1
 
-all: libkheap libcmumalloc libmmlibc
+all: libkheap libcmumalloc libmmlibc libhoard_dbg
 
 alloclibs:
 	mkdir alloclibs
@@ -29,6 +29,13 @@ libcmumalloc_dbg:	alloclibs cmu_malloc/malloc.c
 # Library containing mm_malloc and mm_free wrappers for libc allocator
 libmmlibc:	alloclibs
 	cd libc; $(CC) $(CC_FLAGS) libc_wrapper.c; ar rs ../alloclibs/libmmlibc.a libc_wrapper.o
+
+# Simplified Hoard Allocator
+libhoard: alloclibs	hoard/malloc.c
+	cd hoard; $(CC) $(CC_FLAGS) malloc.c; ar rs ../alloclibs/libhoard.a malloc.o
+
+libhoard_dbg: alloclibs	hoard/malloc.c
+	cd hoard; $(CC) $(CC_DBG_FLAGS) malloc.c; ar rs ../alloclibs/libhoard.a malloc.o
 
 clean:
 	rm -rf alloclibs; rm -f */*.o; rm -f *~

@@ -38,9 +38,16 @@ TEST(Hoard, InitTwice) {
 }
 
 TEST(Hoard, AllocSinglePage) {
-    int i;
-    for(i = 0; i < 400; i++) {
-        mm_malloc(8);
+    const unsigned int NUM_ALLOCS = 400;
+    int i, *nums[NUM_ALLOCS];
+    for(i = 0; i < NUM_ALLOCS; i++) {
+        nums[i] = (int *) mm_malloc(8);
+        *(nums[i]) = i;
+    }
+
+    /* Verify data integrity */
+    for(i = 0; i < NUM_ALLOCS; i++) {
+        ASSERT_EQ(i, *(nums[i]));
     }
 
     TRACE("Memory Usage: %d", mm_usage());

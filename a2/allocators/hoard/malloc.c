@@ -258,6 +258,9 @@ void *mm_malloc(size_t size) {
                     TRACE("TID: %d, Slot Size: %d Fetching from global heap", tid, slotSize);
                     globalUsed = 1;
                     block = global->bins[bin];
+                    if(block->next != NULL) {
+                        block->next->prev = NULL;
+                    }
                     global->bins[bin] = block->next;
                     init_superblock(block, tid, processor, slotSize);
                 }
@@ -321,6 +324,7 @@ void mm_free(void *ptr) {
     int slot = (char *)ptr - BLOCK_DATA(block, 0);
     assert(slot % block->slotSize == 0);
     slot = slot / block->slotSize;
+    assert(slot <= block->slots);
 
     /* Mark slot as unused */
     uint8_t *directory = BLOCK_DIR(block);
@@ -346,7 +350,7 @@ void mm_free(void *ptr) {
 
         /* Remove block from processor heap */
         if(heap->bins[bin] == block) {
-            heap->bins[bin] = NULL;
+            heap->bins[bin] = block->next;
         }
 
         if(block->prev != NULL) {

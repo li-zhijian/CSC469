@@ -175,13 +175,7 @@ inline uint32_t num_slots(uint32_t space, uint32_t slotSize) {
     return slots;
 }
 
-/**
- * NOTE: To be only called while having lock for processor heap.
- */
-block_t *alloc_superblock(uint32_t tid, uint32_t processor, uint32_t slotSize) {
-    block_t *block = (block_t *) mem_sbrk(pageSize);
-    assert(block != NULL);
-
+void init_superblock(block_t *block, uint32_t tid, uint32_t processor, uint32_t slotSize) {
     /* Set signature and other identification fields */
     block->sig = BLK_SIG;
     block->tid = tid;
@@ -192,11 +186,24 @@ block_t *alloc_superblock(uint32_t tid, uint32_t processor, uint32_t slotSize) {
 
     /* Calculate number of slots and set up directory */
     block->slots = num_slots(pageSize - sizeof(block_t), slotSize);
+    /**
+     * TODO: Add data offset calculation to align on 8-byte boundary.
+     */
     block->freeSlots = block->slots;
     block->dataOffset = sizeof(block_t) + CEIL(block->slots, 8);
 
     /* Mark all slots as cleared */
     memset(BLOCK_DIR(block), 0, CEIL(block->slots, 8));
+}
+
+/**
+ * NOTE: To be only called while having lock for processor heap.
+ */
+block_t *alloc_superblock(uint32_t tid, uint32_t processor, uint32_t slotSize) {
+    block_t *block = (block_t *) mem_sbrk(pageSize);
+    assert(block != NULL);
+
+    init_superblock(block, tid, processor, slotSize);
 
     return block;
 }

@@ -56,3 +56,8 @@ TEST(Hoard, AllocSinglePage) {
         TRACE("Memory Usage: %d", mm_usage());
     }
 }
+
+TEST(Hoard, GreaterThanPageSize) {
+    char *ptr = (char *)mm_malloc(4096);
+    mm_free(ptr);
+}

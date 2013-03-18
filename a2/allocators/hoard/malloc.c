@@ -218,7 +218,12 @@ block_t *alloc_superblock(uint32_t tid, uint32_t processor, uint32_t slotSize) {
 
 void *mm_malloc(size_t size) {
     if(size > pageSize/2) {
-        FATAL("Objects greater than PageSize/2 not supported yet.");
+        //FATAL("Objects greater than PageSize/2 not supported yet.");
+        char *ptr = (char *) malloc(size);
+        if(ptr >= dseg_lo && ptr <= dseg_hi) {
+            FATAL("Pointer malloc'd within our region!");
+        }
+        return ptr;
     }
 
     /* Fetch Thread ID and hash to processor */
@@ -330,9 +335,11 @@ void *mm_malloc(size_t size) {
 }
 
 void mm_free(void *ptr) {
-    /* Make sure pointer is within our boundaries */
-    assert((char *)ptr >= dseg_lo);
-    assert((char *)ptr <= dseg_hi);
+    /* Make sure pointer is within our boundaries else call os free */
+    if((char *)ptr < dseg_lo || (char *)ptr > dseg_hi) {
+        free(ptr);
+        return;
+    }
 
     block_t *block = PAGE_ALIGN(ptr);
     assert(block->sig == BLK_SIG);

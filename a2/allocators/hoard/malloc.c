@@ -234,14 +234,39 @@ void *mm_malloc(size_t size) {
     }
 
     /* Acquire lock for heap */
-    TRACE("ACQ: TID: %d, Processor: %d, Size: %d, Slot Size: %d, Bin: %d", tid, processor, size, slotSize, bin);
+    //TRACE("ACQ: TID: %d, Processor: %d, Size: %d, Slot Size: %d, Bin: %d", tid, processor, size, slotSize, bin);
     pthread_mutex_lock(&(heap->lock));
 
     block_t *block = heap->bins[bin];
 
     if(block == NULL) {
-        /* Create first superblock in bin */
-        block = alloc_superblock(tid, processor, slotSize);
+        /**
+         * TODO: Make this into a separate function since this exact code
+         * is copied below in the loop as well.
+         *
+         * Check for blocks in global heap
+         */
+        uint32_t globalUsed = 0;
+        heap_t *global = heaps + numProcessors;
+
+        pthread_mutex_lock(&(global->lock));
+        if(global->bins[bin] != NULL) {
+            TRACE("TID: %d, Slot Size: %d Fetching from global heap", tid, slotSize);
+            globalUsed = 1;
+            block = global->bins[bin];
+            if(block->next != NULL) {
+                block->next->prev = NULL;
+            }
+            global->bins[bin] = block->next;
+            init_superblock(block, tid, processor, slotSize);
+        }
+        pthread_mutex_unlock(&(global->lock));
+
+        if(globalUsed == 0) {
+            /* Create first superblock in bin */
+            block = alloc_superblock(tid, processor, slotSize);
+        }
+
         heap->bins[bin] = block;
     } else {
         /* Traverse superblock list to find right block or allocate new */

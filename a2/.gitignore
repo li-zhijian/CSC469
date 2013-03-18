@@ -6,6 +6,8 @@
 # General
 *.pdf
 *.swp
+*.ps
+*.tgz
 
 # Compiled Files
 benchmarks/cache-scratch/cache-scratch-*
@@ -13,3 +15,4 @@ benchmarks/cache-thrash/cache-thrash-*
 benchmarks/larson/larson-*
 benchmarks/threadtest/threadtest-*
 tests/tests-*
+Results/

@@ -38,7 +38,7 @@ TEST(Hoard, InitTwice) {
 }
 
 TEST(Hoard, AllocSinglePage) {
-    const unsigned int NUM_ALLOCS = 400;
+    const unsigned int NUM_ALLOCS = 1000;
     int i, *nums[NUM_ALLOCS];
     for(i = 0; i < NUM_ALLOCS; i++) {
         nums[i] = (int *) mm_malloc(8);

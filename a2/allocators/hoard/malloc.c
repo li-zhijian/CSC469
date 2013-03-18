@@ -85,6 +85,11 @@ inline int first_unset(uint8_t num);
 /* Superblock macros */
 #define BLOCK_DIR(b) (((uint8_t *)(b)) + sizeof(block_t))
 #define BLOCK_DATA(b, slot) (((char *)(b) + (b)->dataOffset) + ((b)->slotSize * slot))
+#define BIN_ADD_HEAD(bin, block) do { \
+    (block)->next = (bin); \
+    (bin)->prev = (block); \
+    (bin) = (block); \
+} while(0)
 
 /**
  *  Math Macros
@@ -210,7 +215,7 @@ block_t *alloc_superblock(uint32_t tid, uint32_t processor, uint32_t slotSize) {
 
 void *mm_malloc(size_t size) {
     if(size > pageSize/2) {
-        FATAL("Objects greater than PageSize/2 not supported yet");
+        FATAL("Objects greater than PageSize/2 not supported yet.");
     }
 
     /* Fetch Thread ID and hash to processor */
@@ -241,8 +246,18 @@ void *mm_malloc(size_t size) {
         while(block->tid != tid || block->freeSlots == 0) {
             assert(block->sig == BLK_SIG);
             if(block->next == NULL) {
-                FATAL("Reached end of blocks list, implement new block allocation!");
+                /**
+                 * TODO: Add superblock lookup in global heap
+                 */
+                block = alloc_superblock(tid, processor, slotSize);
+
+                /* Add block to front of bin */
+                BIN_ADD_HEAD(heap->bins[bin], block);
+
+                break;
             }
+
+            block = block->next;
         }
     }
 

@@ -36,3 +36,12 @@ TEST(Hoard, Init) {
 TEST(Hoard, InitTwice) {
     ASSERT_EQ(-1, mm_init());
 }
+
+TEST(Hoard, AllocSinglePage) {
+    int i;
+    for(i = 0; i < 400; i++) {
+        mm_malloc(8);
+    }
+
+    TRACE("Memory Usage: %d", mm_usage());
+}

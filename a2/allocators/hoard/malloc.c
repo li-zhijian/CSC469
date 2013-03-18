@@ -61,6 +61,8 @@ typedef struct block_t {
     uint32_t processor;
     uint32_t tid;
     uint32_t slotSize;
+    uint32_t freeSlots;
+    uint32_t slots;
     uint32_t dataOffset;
     struct block_t *prev, *next;
 } block_t;
@@ -79,6 +81,16 @@ int numProcessors = 0, pageSize = 0;
 /* Bit manipulation functions */
 inline int bits_set(uint8_t num);
 inline int first_unset(uint8_t num);
+
+/* Superblock macros */
+#define BLOCK_DIR(b) (((uint8_t *)(b)) + sizeof(block_t))
+#define BLOCK_DATA(b, slot) (((char *)(b) + (b)->dataOffset) + ((b)->slotSize * slot))
+
+/**
+ *  Math Macros
+ *  Source: http://en.wikipedia.org/wiki/Floor_and_ceiling_functions#Quotients
+ */
+#define CEIL(x, y) (((x) + (y) - 1) / (y))
 
 /**
  * Processor heaps will be at locations heaps[0] to heaps[numProcessors - 1]
@@ -146,8 +158,108 @@ int mm_init() {
     return 0;
 }
 
+/**
+ * Hash thread id to a processor
+ */
+inline int hash_tid(int tid) {
+    return tid % numProcessors;
+}
+
+inline uint32_t num_slots(uint32_t space, uint32_t slotSize) {
+    /**
+     * Calculate number of slots assuming they will be a multiple of 8
+     * and integer division makes sure we never exceed allocated space.
+     */
+    int slots = (8 * space) / (8 * slotSize + 1);
+
+    return slots;
+}
+
+/**
+ * NOTE: To be only called while having lock for processor heap.
+ */
+block_t *alloc_superblock(uint32_t tid, uint32_t processor, uint32_t slotSize) {
+    block_t *block = (block_t *) mem_sbrk(pageSize);
+    assert(block != NULL);
+
+    /* Set signature and other identification fields */
+    block->sig = BLK_SIG;
+    block->tid = tid;
+    block->processor = processor;
+    block->slotSize = slotSize;
+    block->prev = NULL;
+    block->next = NULL;
+
+    /* Calculate number of slots and set up directory */
+    block->slots = num_slots(pageSize - sizeof(block_t), slotSize);
+    block->freeSlots = block->slots;
+    block->dataOffset = sizeof(block_t) + CEIL(block->slots, 8);
+
+    /* Mark all slots as cleared */
+    memset(BLOCK_DIR(block), 0, CEIL(block->slots, 8));
+
+    return block;
+}
+
 void *mm_malloc(size_t size) {
-    return mem_sbrk(size);
+    if(size > pageSize/2) {
+        FATAL("Objects greater than PageSize/2 not supported yet");
+    }
+
+    /* Fetch Thread ID and hash to processor */
+    uint32_t tid = getTID();
+    uint32_t processor = hash_tid(tid);
+    heap_t *heap = heaps + processor;
+
+    /* Calculate appropriate bin */
+    uint32_t bin = SLOT_MIN_POW, slotSize = SLOT_MIN_SIZE;
+    while(size > slotSize) {
+        bin++;
+        slotSize *= 2;
+    }
+
+    /* Acquire lock for heap */
+    TRACE("ACQ: TID: %d, Processor: %d, Size: %d, Slot Size: %d, Bin: %d", tid, processor, size, slotSize, bin);
+    pthread_mutex_lock(&(heap->lock));
+
+    block_t *block = heap->bins[bin];
+
+    if(block == NULL) {
+        /* Create first superblock in bin */
+        block = alloc_superblock(tid, processor, slotSize);
+        heap->bins[bin] = block;
+    } else {
+        /* Traverse superblock list to find right block or allocate new */
+        assert(block->sig == BLK_SIG);
+        while(block->tid != tid || block->freeSlots == 0) {
+            assert(block->sig == BLK_SIG);
+            if(block->next == NULL) {
+                FATAL("Reached end of blocks list, implement new block allocation!");
+            }
+        }
+    }
+
+    /* We now have a valid block with free slots, choose one of the slots and return to user */
+    uint8_t *directory = BLOCK_DIR(block), i;
+    int32_t slot = -1;
+    for(i = 0; 8*i < block->slots; i += 1) {
+        if((slot = first_unset(directory[i])) != -1) {
+            assert(8*i + slot < block->slots);
+
+            /* Mark slot as used */
+            directory[i] = directory[i] | 1 << (7 - slot);
+            slot += 8*i;
+            block->freeSlots -= 1;
+            TRACE("ALLOC: TID: %d, Slot: %d:%d, Free Slots: %d", tid, slotSize, slot, block->freeSlots);
+            break;
+        }
+    }
+
+    /* Release lock for heap */
+    TRACE("REL: TID: %d, Processor: %d, Size: %d, Slot Size: %d, Bin: %d", tid, processor, size, slotSize, bin);
+    pthread_mutex_unlock(&(heap->lock));
+
+    return slot != -1 ? BLOCK_DATA(block, slot) : NULL;
 }
 
 void mm_free(void *ptr) {

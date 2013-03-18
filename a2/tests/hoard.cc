@@ -48,6 +48,7 @@ TEST(Hoard, AllocSinglePage) {
     /* Verify data integrity */
     for(i = 0; i < NUM_ALLOCS; i++) {
         ASSERT_EQ(i, *(nums[i]));
+        mm_free(nums[i]);
     }
 
     TRACE("Memory Usage: %d", mm_usage());

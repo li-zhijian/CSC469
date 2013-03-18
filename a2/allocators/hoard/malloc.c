@@ -91,6 +91,9 @@ inline int first_unset(uint8_t num);
     (bin) = (block); \
 } while(0)
 
+/* Align pointer to closest page boundary downwards */
+#define PAGE_ALIGN(p)    ((void *)(((unsigned long)(p) / pageSize) * pageSize))
+
 /**
  *  Math Macros
  *  Source: http://en.wikipedia.org/wiki/Floor_and_ceiling_functions#Quotients
@@ -181,6 +184,9 @@ inline uint32_t num_slots(uint32_t space, uint32_t slotSize) {
 }
 
 void init_superblock(block_t *block, uint32_t tid, uint32_t processor, uint32_t slotSize) {
+    /* Clear whole block */
+    memset((char *)block, 0, pageSize);
+
     /* Set signature and other identification fields */
     block->sig = BLK_SIG;
     block->tid = tid;
@@ -196,9 +202,6 @@ void init_superblock(block_t *block, uint32_t tid, uint32_t processor, uint32_t 
      */
     block->freeSlots = block->slots;
     block->dataOffset = sizeof(block_t) + CEIL(block->slots, 8);
-
-    /* Mark all slots as cleared */
-    memset(BLOCK_DIR(block), 0, CEIL(block->slots, 8));
 }
 
 /**
@@ -246,10 +249,23 @@ void *mm_malloc(size_t size) {
         while(block->tid != tid || block->freeSlots == 0) {
             assert(block->sig == BLK_SIG);
             if(block->next == NULL) {
-                /**
-                 * TODO: Add superblock lookup in global heap
-                 */
-                block = alloc_superblock(tid, processor, slotSize);
+                /* Check for blocks in global heap */
+                uint32_t globalUsed = 0;
+                heap_t *global = heaps + numProcessors;
+
+                pthread_mutex_lock(&(global->lock));
+                if(global->bins[bin] != NULL) {
+                    TRACE("TID: %d, Slot Size: %d Fetching from global heap", tid, slotSize);
+                    globalUsed = 1;
+                    block = global->bins[bin];
+                    global->bins[bin] = block->next;
+                    init_superblock(block, tid, processor, slotSize);
+                }
+                pthread_mutex_unlock(&(global->lock));
+
+                if(globalUsed == 0) {
+                    block = alloc_superblock(tid, processor, slotSize);
+                }
 
                 /* Add block to front of bin */
                 BIN_ADD_HEAD(heap->bins[bin], block);
@@ -285,6 +301,75 @@ void *mm_malloc(size_t size) {
 }
 
 void mm_free(void *ptr) {
+    /* Make sure pointer is within our boundaries */
+    assert((char *)ptr >= dseg_lo);
+    assert((char *)ptr <= dseg_hi);
+
+    block_t *block = PAGE_ALIGN(ptr);
+    assert(block->sig == BLK_SIG);
+
+    uint32_t processor = block->processor;
+    heap_t *heap = heaps + processor;
+
+    /* Acquire lock for heap */
+    pthread_mutex_lock(&(heap->lock));
+
+    /* Make sure block hasn't been moved to different heap */
+    assert(block->processor == processor);
+
+    /* Calculate slot number */
+    int slot = (char *)ptr - BLOCK_DATA(block, 0);
+    assert(slot % block->slotSize == 0);
+    slot = slot / block->slotSize;
+
+    /* Mark slot as unused */
+    uint8_t *directory = BLOCK_DIR(block);
+    directory[slot/8] = directory[slot/8] & ~(1 << (7 - (slot % 8)));
+    block->freeSlots += 1;
+
+    TRACE("FREE: TID: %d, Processor: %d, Slot Size: %d, Slot: %d, Free Slots %d",
+            block->tid, block->processor, block->slotSize, slot, block->freeSlots);
+
+    if(block->freeSlots == block->slots) {
+        TRACE("FREE: Block empty, move to global heap.");
+
+        /* Acquire lock for global heap */
+        heap_t *global = heaps + numProcessors;
+        pthread_mutex_lock(&(global->lock));
+
+        /* Calculate bin from slotSize */
+        uint32_t bin = SLOT_MIN_POW, size = SLOT_MIN_SIZE;
+        while(size != block->slotSize) {
+            bin++;
+            size *= 2;
+        }
+
+        /* Remove block from processor heap */
+        if(heap->bins[bin] == block) {
+            heap->bins[bin] = NULL;
+        }
+
+        if(block->prev != NULL) {
+            block->prev->next = block->next;
+        }
+
+        if(block->next != NULL) {
+            block->next->prev = block->prev;
+        }
+
+        /* Add block to global heap */
+        if(global->bins[bin] == NULL) {
+            global->bins[bin] = block;
+        } else {
+            BIN_ADD_HEAD(global->bins[bin], block);
+        }
+
+        /* Release lock for global heap */
+        pthread_mutex_unlock(&(global->lock));
+    }
+
+    /* Release lock for heap */
+    pthread_mutex_unlock(&(heap->lock));
 }
 
 /**

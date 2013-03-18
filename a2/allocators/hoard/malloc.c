@@ -267,6 +267,7 @@ void *mm_malloc(size_t size) {
                 pthread_mutex_unlock(&(global->lock));
 
                 if(globalUsed == 0) {
+                    TRACE("TID: %d, Slot Size: %d Allocating new superblock", tid, slotSize);
                     block = alloc_superblock(tid, processor, slotSize);
                 }
 
@@ -291,13 +292,13 @@ void *mm_malloc(size_t size) {
             directory[i] = directory[i] | 1 << (7 - slot);
             slot += 8*i;
             block->freeSlots -= 1;
-            TRACE("ALLOC: TID: %d, Slot: %d:%d, Free Slots: %d", tid, slotSize, slot, block->freeSlots);
+            //TRACE("ALLOC: TID: %d, Slot: %d:%d, Free Slots: %d", tid, slotSize, slot, block->freeSlots);
             break;
         }
     }
 
     /* Release lock for heap */
-    TRACE("REL: TID: %d, Processor: %d, Size: %d, Slot Size: %d, Bin: %d", tid, processor, size, slotSize, bin);
+    //TRACE("REL: TID: %d, Processor: %d, Size: %d, Slot Size: %d, Bin: %d", tid, processor, size, slotSize, bin);
     pthread_mutex_unlock(&(heap->lock));
 
     return slot != -1 ? BLOCK_DATA(block, slot) : NULL;
@@ -331,8 +332,8 @@ void mm_free(void *ptr) {
     directory[slot/8] = directory[slot/8] & ~(1 << (7 - (slot % 8)));
     block->freeSlots += 1;
 
-    TRACE("FREE: TID: %d, Processor: %d, Slot Size: %d, Slot: %d, Free Slots %d",
-            block->tid, block->processor, block->slotSize, slot, block->freeSlots);
+    /*TRACE("FREE: TID: %d, Processor: %d, Slot Size: %d, Slot: %d, Free Slots %d",
+            block->tid, block->processor, block->slotSize, slot, block->freeSlots);*/
 
     if(block->freeSlots == block->slots) {
         TRACE("FREE: Block empty, move to global heap.");

@@ -347,11 +347,21 @@ void mm_free(void *ptr) {
     uint32_t processor = block->processor;
     heap_t *heap = heaps + processor;
 
-    /* Acquire lock for heap */
-    pthread_mutex_lock(&(heap->lock));
+    while(1) {
+        processor = block->processor;
+        heap = heaps + processor;
 
-    /* Make sure block hasn't been moved to different heap */
-    assert(block->processor == processor);
+        /* Acquire lock for heap */
+        pthread_mutex_lock(&(heap->lock));
+
+        /* Make sure block hasn't been moved to different heap */
+        if(block->processor == processor) {
+            break;
+        }
+
+        TRACE("Block Processor Changed while locking");
+        pthread_mutex_unlock(&(heap->lock));
+    }
 
     /* Calculate slot number */
     int slot = (char *)ptr - BLOCK_DATA(block, 0);

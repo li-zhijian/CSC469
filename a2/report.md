@@ -50,23 +50,57 @@ time:
 Performance
 ===========
 
+All benchmarks were executed on Amazon EC2 High-CPU Extra Large Instances.
+These instances have 7 GB of RAM and 8 cores.
+
 Memory Overhead
-:   Each super-block has the following memory overhead.
+---------------
 
-    36 byte fixed header including: signature, process id, thread id, slot
-    size, free slots, total slots, data offset, and previous and next
-    pointers.
+Each super-block has the following memory overhead:
 
-    $\left\lceil\frac{\#}{8}\right\rceil$ bytes for the bit
-    vector aligned to an 8-byte boundary.
+* 36 byte fixed header including: signature, process id, thread id, slot size,
+  free slots, total slots, data offset, and previous and next pointers.
+* $\left\lceil\frac{\#}{8}\right\rceil$ bytes for the bit vector aligned to an
+  8-byte boundary.
 
-    Thus, a 4K super-block has 498 8-byte slots, 250 16-byte slots, 125
-    32-byte slots, $\ldots$
+Thus, a 4K super-block has 498 8-byte slots, 250 16-byte slots, 125
+32-byte slots, $\ldots$
 
+Scalability
+-----------
 
-![Performance on `cache-scratch`](benchmarks/cache-scratch/cache-scratch.png)
-![Performance on `cache-thrash`](benchmarks/cache-thrash/cache-thrash.png)
-![Performance on `threadtest`](benchmarks/threadtest/threadtest.png)
+![Scalability (`threadtest`)](benchmarks/threadtest/threadtest.png)\ 
+
+Because of the overhead of maintaining separate heaps and super-block bins
+our implementation is slower than kheap, CMU and libc on a single-threaded
+test, but as the number of processes increases we beat both, kheap and CMU and
+come very close to libc.
+
+Active False Sharing
+--------------------
+
+![Active False Sharing (`cache-thrash`)](benchmarks/cache-thrash/cache-thrash.png)\ 
+
+We beat all three, libc, kheap and CMU, on this benchmark.
+
+Having thread owned super-blocks made sure that the probability of active
+false sharing is very low.
+
+Passive False Sharing
+---------------------
+
+![Passive False Sharing (`cache-scratch`)](benchmarks/cache-scratch/cache-scratch.png)\ 
+
+We beat kheap and CMU and were very close (sometimes ahead) of libc.
+
+Hashing process ids to heaps reduces the probability of passive false sharing.
+
+Larson
+------
+
+The benchmark was taking far too long to execute on all implementations but
+libc, so we were unable to compare our performance to others due to lack of
+time.
 
 Bibliography
 ============

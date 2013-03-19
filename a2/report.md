@@ -18,9 +18,9 @@ with the following features:
 * No notion of an emptiness fraction. A super-block is moved to the global
   heap if emptied out.
 
-Every time a new allocation request comes in the thread ID is hashed to a
+Every time a new allocation request comes in the thread id is hashed to a
 processor heap and the request size is rounded up to the nearest power of two
-(slot). Then the heap is checked to see if the thread ID already has a
+(slot). Then the heap is checked to see if the thread id already has a
 super-block allocated for the given slot size. If yes, then mark the slot used
 in that super-block's bit vector; otherwise allocate new super-block from
 global heap/extend heap (`sbreak`).
@@ -44,7 +44,7 @@ Possible further optimizations considered but not implemented due to lack of
 time:
 
 * $2P$ heaps to reduce lock contention from multiple threads.
-* Better hashing function in lieu of modulo that takes the processor ID into
+* Better hashing function in lieu of modulo that takes the processor id into
   account and assigns a heap accordingly.
 
 Performance
@@ -53,11 +53,11 @@ Performance
 Memory Overhead
 :   Each super-block has the following memory overhead.
 
-    36 byte fixed header including: signature, process ID, thread Id, slot
+    36 byte fixed header including: signature, process id, thread id, slot
     size, free slots, total slots, data offset, and previous and next
     pointers.
 
-    $\left\lceil\frac{\text{number of slots}}{8}\right\rceil$ bytes for the bit
+    $\left\lceil\frac{\#}{8}\right\rceil$ bytes for the bit
     vector aligned to an 8-byte boundary.
 
     Thus, a 4K super-block has 498 8-byte slots, 250 16-byte slots, 125
@@ -71,9 +71,9 @@ Memory Overhead
 Bibliography
 ============
 
- 
-:   D. Porter. *The Art and Science of Memory Allocation.*
-    <http://www.cs.stonybrook.edu/~porter/courses/cse506/f11/slides/malloc.pdf>
-:   E.D. Berger, K.S. McKinley, R.D. Blumofe, P.R. Wilson. *Hoard: A Scalable
-    Memory Allocator for Multithreaded Applications.*
+
+* D. Porter. *The Art and Science of Memory Allocation.*
+  <http://www.cs.stonybrook.edu/~porter/courses/cse506/f11/slides/malloc.pdf>
+* E.D. Berger, K.S. McKinley, R.D. Blumofe, P.R. Wilson. *Hoard: A Scalable
+  Memory Allocator for Multithreaded Applications.*
 

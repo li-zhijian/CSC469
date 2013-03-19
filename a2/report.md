@@ -60,8 +60,8 @@ Each super-block has the following memory overhead:
 
 * 36 byte fixed header including: signature, process id, thread id, slot size,
   free slots, total slots, data offset, and previous and next pointers.
-* $\left\lceil\frac{\#}{8}\right\rceil$ bytes for the bit vector aligned to an
-  8-byte boundary.
+* $\left\lceil\frac{\#\text{ of slots}}{8}\right\rceil$ bytes for the bit
+  vector aligned to an 8-byte boundary.
 
 Thus, a 4K super-block has 498 8-byte slots, 250 16-byte slots, 125
 32-byte slots, $\ldots$
@@ -86,6 +86,14 @@ We beat all three, libc, kheap and CMU, on this benchmark.
 Having thread owned super-blocks made sure that the probability of active
 false sharing is very low.
 
+Since a typical page size is 4KB, and memory requests are generally of the
+same size, and the number of threads is bounded, even if every thread
+allocates only a single object, the maximum allocator overhead per thread is
+4KB. Thus, with an SMP system with 100 threads and 8 processes the memory
+fragmentation will be roughly 1MB. Since super-blocks are moved through the
+global heap and re-used for successive allocations, therefore for most use
+cases, the fragmentation will be really low.
+
 Passive False Sharing
 ---------------------
 
@@ -101,6 +109,8 @@ Larson
 The benchmark was taking far too long to execute on all implementations but
 libc, so we were unable to compare our performance to others due to lack of
 time.
+
+\clearpage
 
 Bibliography
 ============

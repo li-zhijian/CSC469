@@ -10,7 +10,7 @@ CC = gcc
 CC_FLAGS = -O3 -I$(INCLUDES) -L $(LIBDIR)
 CC_DBG_FLAGS = -g -I$(INCLUDES) -L $(LIBDIR)
 
-all: cache-scratch-kheap cache-scratch-cmu cache-scratch-libc
+all: cache-scratch-kheap cache-scratch-cmu cache-scratch-libc cache-scratch-hoard
 
 # Allocator based on OS/161 kheap
 
@@ -37,6 +37,10 @@ cache-scratch-libc: $(DEPENDS) $(TOPDIR)/allocators/alloclibs/libmmlibc.a
 
 cache-scratch-libc-dbg: $(DEPENDS_DBG) $(TOPDIR)/allocators/alloclibs/libmmlibc.a
 	$(CC) $(CC_DBG_FLAGS) -o $(@) cache-scratch.c $(TOPDIR)/allocators/alloclibs/libmmlibc.a -lmmutil_dbg -lpthread
+
+# Hoard
+cache-scratch-hoard: $(DEPENDS) $(TOPDIR)/allocators/alloclibs/libhoard.a
+	$(CC) $(CC_FLAGS) -o $(@) cache-scratch.c $(TOPDIR)/allocators/alloclibs/libhoard.a -lmmutil -lpthread
 
 # Cleanup
 clean:

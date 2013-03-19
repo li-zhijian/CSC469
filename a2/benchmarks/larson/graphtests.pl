@@ -7,7 +7,7 @@ use strict;
 my $graphtitle = "Larson throughput";
 
 #my @namelist = ("libc", "kheap", "cmu");
-my @namelist = ("libc", "submitted");
+my @namelist = ("libc", "kheap", "cmu", "hoard");
 my %names;
 
 # This allows you to give each series a name on the graph
@@ -16,7 +16,7 @@ my %names;
 $names{"libc"} = "libc";
 $names{"kheap"} = "kheap";
 $names{"cmu"} = "cmu";
-$names{"submitted"} = $ARGV[0];
+$names{"hoard"} = "hoard";
 
 
 my $name;

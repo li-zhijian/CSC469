@@ -10,7 +10,7 @@ CC = gcc
 CC_FLAGS = -O3 -I$(INCLUDES) -L $(LIBDIR)
 CC_DBG_FLAGS = -g -I$(INCLUDES) -L $(LIBDIR)
 
-all: larson-kheap larson-cmu larson-libc
+all: larson-kheap larson-cmu larson-libc larson-hoard
 
 # Allocator based on OS/161 kheap
 
@@ -37,6 +37,10 @@ larson-libc: $(DEPENDS) $(TOPDIR)/allocators/alloclibs/libmmlibc.a
 
 larson-libc-dbg: $(DEPENDS_DBG) $(TOPDIR)/allocators/alloclibs/libmmlibc.a
 	$(CC) $(CC_DBG_FLAGS) -o $(@) larson.c $(TOPDIR)/allocators/alloclibs/libmmlibc.a -lmmutil_dbg -lpthread
+
+# Hoard
+larson-hoard: $(DEPENDS) $(TOPDIR)/allocators/alloclibs/libhoard.a
+	$(CC) $(CC_FLAGS) -o $(@) larson.c $(TOPDIR)/allocators/alloclibs/libhoard.a -lmmutil -lpthread
 
 # Cleanup
 clean:

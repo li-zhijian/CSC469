@@ -75,8 +75,6 @@ static void usage(char **argv) {
 	exit(1);
 }
 
-
-
 void shutdown_clean() {
 	/* Function to clean up after ourselves on exit, freeing any 
 	 * used resources 
@@ -333,6 +331,20 @@ int handle_register_req()
 
 int handle_room_list_req()
 {
+    char res[MAX_MSG_LEN];
+
+    if(send_control_msg(ROOM_LIST_REQUEST, NULL, 0, res) < 0) {
+        return -1;
+    }
+
+    struct control_msghdr *hdr = (struct control_msghdr *) res;
+
+    if(hdr->msg_type == ROOM_LIST_SUCC) {
+        printf("%s", (char *) hdr->msgdata);
+    } else {
+        printf("Room list request failed!");
+        return -1;
+    }
 
 	return 0;
 }
@@ -345,6 +357,21 @@ int handle_member_list_req(char *room_name)
 
 int handle_switch_room_req(char *room_name)
 {
+    char res[MAX_MSG_LEN];
+
+    if(send_control_msg(SWITCH_ROOM_REQUEST,
+            room_name, strlen(room_name) + 1, res) < 0) {
+        return -1;
+    }
+
+    struct control_msghdr *hdr = (struct control_msghdr *) res;
+
+    if(hdr->msg_type == SWITCH_ROOM_SUCC) {
+        printf("Switched to room: %s", room_name);
+    } else {
+        printf("Room switch request failed!");
+        return -1;
+    }
 
 	return 0;
 }

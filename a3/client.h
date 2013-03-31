@@ -59,3 +59,19 @@ typedef struct msgbuf {
 extern char *optarg; /* For option parsing */
 
 extern int retrieve_chatserver_info(char *chatserver_name, u_int16_t *tcp_port, u_int16_t *udp_port);
+
+/* Macro to output debug messages */
+#ifndef DEBUG_H_
+#define DEBUG_H_
+
+#ifdef DEBUG
+#define TRACE(...) do { \
+    printf("%s(%d): ", __FILE__, __LINE__); \
+    printf(__VA_ARGS__); \
+    printf("\n"); \
+} while (0)
+#else
+#define TRACE(...)
+#endif
+
+#endif /* DEBUG_H_ */

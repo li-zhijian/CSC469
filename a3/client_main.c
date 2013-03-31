@@ -329,6 +329,7 @@ int handle_create_room_req(char *room_name)
 int handle_quit_req()
 {
 
+    shutdown_clean();
 	return 0;
 }
 

@@ -167,20 +167,55 @@ void handle_received_msg(char *buf)
  */
 void receive_msgs()
 {
-	char *buf = (char *)malloc(MAX_MSG_LEN);
-  
-	if (buf == 0) {
-		printf("Could not malloc memory for message buffer\n");
-		exit(1);
-	}
+	char buf[MAX_MSG_LEN];
 
+	/* Initialize file descriptor sets for select */
+	fd_set rset;
 
-	/**** YOUR CODE HERE ****/
+	/*
+	 * Should really use POSIX Message Queus so that we can monitor both
+	 * Socket and Queue using select. But since makefile doesn't link
+	 * against librt it is not possible to do so for this assignment.
+	 */
+	FD_ZERO(&rset); /* Clear Set */
+	FD_SET(udp_socket_fd, &rset);
 
-	while(TRUE) {
+	int maxfd = udp_socket_fd;
 
-		/**** YOUR CODE HERE ****/
+	while(1) {
+	    /* Initialize timeout */
+	    struct timeval tv;
+	    tv.tv_sec = 0;
+	    tv.tv_usec = 100 * 1000; /* 100 Milliseconds */
 
+	    /* Wait for one of the fd's to become active or timeout */
+	    if(select(maxfd + 1, &rset, NULL, NULL, &tv) != 0) {
+            perror("select");
+            exit(1);
+        }
+
+	    /* Check Message Queue */
+        int result;
+        msg_t msg;
+        result = msgrcv(ctrl2rcvr_qid, &msg, sizeof(struct body_s), RECV_TYPE, IPC_NOWAIT);
+        if (result == -1 && errno == ENOMSG) {
+            continue;
+        } else if (result > 0) {
+            if (msg.body.status == CHAT_QUIT) {
+                printf("Quitting chat\n");
+                close(udp_socket_fd);
+
+                #ifdef DEBUG
+                /* Let user know we're quitting */
+                fflush(stdout);
+                usleep(250 * 1000);
+                #endif
+
+                exit(0);
+            }
+        } else {
+            perror("msgrcv");
+        }
 	}
 
 	/* Cleanup */

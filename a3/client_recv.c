@@ -227,7 +227,7 @@ void receive_msgs()
 int main(int argc, char **argv) {
 	char option;
 
-	printf("RECEIVER alive: parsing options! (argc = %d\n",argc);
+	printf("RECEIVER alive: parsing options! (argc = %d)\n",argc);
 
 	while((option = getopt(argc, argv, option_string)) != -1) {
 		switch(option) {

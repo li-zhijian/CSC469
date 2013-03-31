@@ -251,9 +251,18 @@ int create_receiver()
  * on error.
  */
 
-int handle_register_req()
-{
+/**
+ * Send a control message to server with specified data. Returns the number
+ * of bytes read from the server and puts them in result.
+ *
+ * Note: char *result must be of at least MAX_MSG_LEN
+ */
+int send_control_msg(uint16_t msg_type, char *data, uint16_t data_len, char *result) {
     int status;
+
+    /* Initialize buffer */
+    char buf[MAX_MSG_LEN];
+    memset(buf, 0, MAX_MSG_LEN);
 
     /* Initialize TCP socket */
     int tcp_socket_fd = socket(server_tcp_info->ai_family, server_tcp_info->ai_socktype, server_tcp_info->ai_protocol);
@@ -264,39 +273,58 @@ int handle_register_req()
         return -1;
     }
 
-    char buf[MAX_MSG_LEN];
-    memset(buf, 0, MAX_MSG_LEN);
-
+    /* Initialize headr */
     struct control_msghdr *hdr = (struct control_msghdr *) buf;
     /* DO NOT convert byte order for this value, server uses it directly */
-    hdr->msg_type = REGISTER_REQUEST;
-    hdr->msg_len = sizeof (struct control_msghdr)
-            + sizeof (struct register_msgdata) + strlen(member_name) + 1;
+    hdr->msg_type = msg_type;
+    hdr->member_id = member_id;
+    hdr->msg_len = sizeof (struct control_msghdr) + data_len;
 
-    struct register_msgdata *data = (struct register_msgdata *) hdr->msgdata;
-    /* DO convert this value as it is used directly in network structs */
-    data->udp_port = htons(client_udp_port);
-    strcpy((char *) data->member_name, member_name);
+    /* Copy over data to packet */
+    memcpy(hdr->msgdata, data, data_len);
 
     /* Send packet to server */
     send(tcp_socket_fd, buf, hdr->msg_len, 0);
 
-    /* Clear buffer */
-    memset(buf, 0 , MAX_MSG_LEN);
+    /* Clear return buffer */
+    memset(result, 0, MAX_MSG_LEN);
 
     /* Read result from server */
-    recv(tcp_socket_fd, buf, MAX_MSG_LEN, 0);
-
-    if(hdr->msg_type == REGISTER_SUCC) {
-        TRACE("Successfully registered with server.");
-        member_id = hdr->member_id;
-    } else {
-        TRACE("Could not register with server!");
-        return -1;
-    }
+    status = recv(tcp_socket_fd, result, MAX_MSG_LEN, 0);
 
     /* Close TCP Connection to server */
     close(tcp_socket_fd);
+
+    return status;
+}
+
+int handle_register_req()
+{
+    /* Initialize buffer */
+    char buf[MAX_MSG_LEN], res[MAX_MSG_LEN];
+    memset(buf, 0, MAX_MSG_LEN);
+
+    struct register_msgdata *data = (struct register_msgdata *) buf;
+    /* DO convert this value as it is used directly in network structs */
+    data->udp_port = htons(client_udp_port);
+    strcpy((char *) data->member_name, member_name);
+
+    /* Calculate length */
+    uint16_t data_len = sizeof (struct register_msgdata) + strlen(member_name) + 1;
+
+    if(send_control_msg(REGISTER_REQUEST, buf, data_len, res) < 0) {
+        return -1;
+    }
+
+    struct control_msghdr *hdr = (struct control_msghdr *) res;
+
+    if(hdr->msg_type == REGISTER_SUCC) {
+        printf("Successfully registered with server.");
+        member_id = hdr->member_id;
+    } else {
+        printf("Could not register with server!");
+        return -1;
+    }
 
 	return 0;
 }

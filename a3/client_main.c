@@ -81,6 +81,8 @@ void shutdown_clean() {
 	/* Function to clean up after ourselves on exit, freeing any 
 	 * used resources 
 	 */
+    if(server_tcp_info != NULL) freeaddrinfo(server_tcp_info);
+    if(server_udp_info != NULL) freeaddrinfo(server_udp_info);
 
 	/* Add to this function to clean up any additional resources that you
 	 * might allocate.

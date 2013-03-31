@@ -35,11 +35,11 @@ char server_host_name[MAX_HOST_NAME_LEN];
 
 /* For control messages */
 u_int16_t server_tcp_port;
-struct sockaddr_in server_tcp_addr;
+struct addrinfo *server_tcp_info;
 
 /* For chat messages */
 u_int16_t server_udp_port;
-struct sockaddr_in server_udp_addr;
+struct addrinfo *server_udp_info;
 int udp_socket_fd;
 
 /* Needed for REGISTER_REQUEST */
@@ -296,6 +296,20 @@ int init_client()
 	 *
 	 * YOUR CODE HERE
 	 */
+    int status;
+    struct addrinfo tcp_hints, udp_hints;
+
+    /* Make sure hints structs are empty */
+    memset(&tcp_hints, 0, sizeof (tcp_hints));
+    memset(&udp_hints, 0, sizeof (udp_hints));
+
+    /* Initialize TCP Hints */
+    tcp_hints.ai_family = AF_INET; /* Only communicate over IPv4 */
+    tcp_hints.ai_socktype = SOCK_STREAM;
+
+    /* Initialize UDP Hints */
+    udp_hints.ai_family = AF_INET; /* Only communicate over IPv4 */
+    udp_hints.ai_socktype = SOCK_DGRAM;
 
 #ifdef USE_LOCN_SERVER
 
@@ -306,17 +320,74 @@ int init_client()
 #endif
  
 	/* 1. initialization to allow TCP-based control messages to chat server */
+    char tcp_port[MAX_HOST_NAME_LEN];
+    sprintf(tcp_port, "%d", server_tcp_port);
 
+    /* Get TCP server info */
+    if((status = getaddrinfo(server_host_name, tcp_port, &tcp_hints, &server_tcp_info)) != 0) {
+        perror("Error when getting TCP server info");
+        return -1;
+    }
+
+    /* Initialize TCP socket */
+    int tcp_socket_fd = socket(server_tcp_info->ai_family, server_tcp_info->ai_socktype, server_tcp_info->ai_protocol);
+
+    /* Connect to server */
+    if((status = connect(tcp_socket_fd, server_tcp_info->ai_addr, server_tcp_info->ai_addrlen)) != 0) {
+        perror("Error when connecting to chat server.");
+        return -1;
+    }
 
 	/* 2. initialization to allow UDP-based chat messages to chat server */
+    char udp_port[MAX_HOST_NAME_LEN];
+    sprintf(udp_port, "%d", server_udp_port);
 
+    /* Get UDP server info */
+    if((status = getaddrinfo(server_host_name, udp_port, &udp_hints, &server_udp_info)) != 0) {
+        perror("Error when getting UDP server info");
+        return -1;
+    }
+
+    /* Initialize UDP socket */
+    udp_socket_fd = socket(server_udp_info->ai_family, server_udp_info->ai_socktype, server_udp_info->ai_protocol);
 
 	/* 3. spawn receiver process - see create_receiver() in this file. */
 
 
 	/* 4. register with chat server */
-    
+    char buf[MAX_MSG_LEN];
+    memset(buf, 0, MAX_MSG_LEN);
 
+    struct control_msghdr *hdr = (struct control_msghdr *) buf;
+    /* DO NOT convert byte order for this value, server uses it directly */
+    hdr->msg_type = REGISTER_REQUEST;
+    hdr->msg_len = sizeof (struct control_msghdr)
+            + sizeof (struct register_msgdata) + strlen(member_name) + 1;
+
+    struct register_msgdata *data = (struct register_msgdata *) hdr->msgdata;
+    /* DO convert this value as it is used directly in network structs */
+    data->udp_port = htons(8080);
+    strcpy((char *) data->member_name, member_name);
+
+    /* Send packet to server */
+    send(tcp_socket_fd, buf, hdr->msg_len, 0);
+
+    /* Clear buffer */
+    memset(buf, 0 , MAX_MSG_LEN);
+
+    /* Read result from server */
+    recv(tcp_socket_fd, buf, MAX_MSG_LEN, 0);
+
+    if(hdr->msg_type == REGISTER_SUCC) {
+        TRACE("Successfully registered with server.");
+        member_id = hdr->member_id;
+    } else {
+        TRACE("Could not register with server!");
+        return -1;
+    }
+
+    /* Close TCP Connection to server */
+    close(tcp_socket_fd);
 
 	return 0;
 

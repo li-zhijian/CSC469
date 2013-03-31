@@ -2,12 +2,14 @@
 .project
 .cproject
 .settings
+nbproject
 
 # General
 *.pdf
 *.swp
 *.ps
 *.tgz
+*.log
 
 # Compiled Files
 chatclient

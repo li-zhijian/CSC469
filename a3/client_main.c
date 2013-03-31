@@ -322,7 +322,7 @@ int handle_register_req()
         printf("Successfully registered with server.");
         member_id = hdr->member_id;
     } else {
-        printf("Could not register with server!");
+        printf("Could not register with server: %s", (char *) hdr->msgdata);
         return -1;
     }
 
@@ -342,7 +342,7 @@ int handle_room_list_req()
     if(hdr->msg_type == ROOM_LIST_SUCC) {
         printf("%s", (char *) hdr->msgdata);
     } else {
-        printf("Room list request failed!");
+        printf("Room list request failed: %s", (char *) hdr->msgdata);
         return -1;
     }
 
@@ -369,7 +369,7 @@ int handle_switch_room_req(char *room_name)
     if(hdr->msg_type == SWITCH_ROOM_SUCC) {
         printf("Switched to room: %s", room_name);
     } else {
-        printf("Room switch request failed!");
+        printf("Room switch request failed: %s", (char *) hdr->msgdata);
         return -1;
     }
 

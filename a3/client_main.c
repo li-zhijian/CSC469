@@ -358,7 +358,11 @@ int handle_create_room_req(char *room_name)
 
 int handle_quit_req()
 {
+    /* Send quit message to server */
+    char res[MAX_MSG_LEN];
+    send_control_msg(QUIT_REQUEST, NULL, 0, res);
 
+    /* Don't care about return value from server, go ahead and quit */
     shutdown_clean();
 	return 0;
 }

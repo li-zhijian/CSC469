@@ -353,6 +353,9 @@ int init_client()
 
 	/* 3. spawn receiver process - see create_receiver() in this file. */
 
+    if((status = create_receiver()) != 0) {
+        return -1;
+    }
 
 	/* 4. register with chat server */
     char buf[MAX_MSG_LEN];
@@ -366,7 +369,7 @@ int init_client()
 
     struct register_msgdata *data = (struct register_msgdata *) hdr->msgdata;
     /* DO convert this value as it is used directly in network structs */
-    data->udp_port = htons(8080);
+    data->udp_port = htons(client_udp_port);
     strcpy((char *) data->member_name, member_name);
 
     /* Send packet to server */

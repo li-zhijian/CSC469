@@ -24,6 +24,18 @@ static char *option_string = "f:";
 int ctrl2rcvr_qid;
 char ctrl2rcvr_fname[MAX_FILE_NAME_LEN];
 
+/* Socket to listen for messages */
+u_int16_t client_udp_port;
+struct addrinfo *client_udp_info;
+int udp_socket_fd;
+
+/* Macro for queue operations */
+#define ERROR(code) do { \
+    send_error(ctrl2rcvr_qid, (code)); \
+    exit(-1); \
+} while(0)
+
+#define OK(code) send_ok(ctrl2rcvr_qid, (code))
 
 void usage(char **argv) {
 	printf("usage:\n");
@@ -91,11 +103,42 @@ void init_receiver()
 	/**** YOUR CODE TO FILL IMPLEMENT STEPS 2 AND 3 ****/
 
 	/* 2. Initialize UDP socket for receiving chat messages. */
+	int status;
+	struct addrinfo hints;
+
+	/* Make sure hints struct is empty */
+	memset(&hints, 0, sizeof (struct addrinfo));
+
+	/* Initialize hints */
+	hints.ai_family = AF_INET; /* Only communicate over IPv4 */
+	hints.ai_socktype = SOCK_DGRAM; /* Listen for UDP packets */
+	hints.ai_flags = AI_PASSIVE | AI_NUMERICSERV; /* Fill in my IP */
+
+	/* Get our address info */
+	if((status = getaddrinfo(NULL, "0", &hints, &client_udp_info)) != 0) {
+	    ERROR(NAME_FAILED);
+	}
+
+	/* Initialize Socket */
+	if((udp_socket_fd = socket(client_udp_info->ai_family, client_udp_info->ai_socktype, client_udp_info->ai_protocol)) == -1) {
+	    ERROR(SOCKET_FAILED);
+	}
+
+	/* Bind socket to any available port */
+	if(bind(udp_socket_fd, client_udp_info->ai_addr, client_udp_info->ai_addrlen) == -1) {
+	    ERROR(BIND_FAILED);
+	}
+
+	/* Get Socket Info */
+	if(getsockname(udp_socket_fd, client_udp_info->ai_addr, &(client_udp_info->ai_addrlen)) != 0) {
+	    ERROR(NAME_FAILED);
+	}
 
 	/* 3. Tell parent the port number if successful, or failure code if not. 
 	 *    Use the send_error and send_ok functions
 	 */
-
+	client_udp_port = ntohs(((struct sockaddr_in *)client_udp_info->ai_addr)->sin_port);
+	OK(client_udp_port);
 }
 
 

@@ -351,6 +351,21 @@ int handle_room_list_req()
 
 int handle_member_list_req(char *room_name)
 {
+    char res[MAX_MSG_LEN];
+
+    if(send_control_msg(MEMBER_LIST_REQUEST,
+            room_name, strlen(room_name) + 1, res) < 0) {
+        return -1;
+    }
+
+    struct control_msghdr *hdr = (struct control_msghdr *) res;
+
+    if(hdr->msg_type == MEMBER_LIST_SUCC) {
+        printf("Members in room %s: %s", room_name, (char *) hdr->msgdata);
+    } else {
+        printf("Member list request failed: %s", (char *) hdr->msgdata);
+        return -1;
+    }
 
 	return 0;
 }
@@ -378,6 +393,21 @@ int handle_switch_room_req(char *room_name)
 
 int handle_create_room_req(char *room_name)
 {
+    char res[MAX_MSG_LEN];
+
+    if(send_control_msg(CREATE_ROOM_REQUEST,
+            room_name, strlen(room_name) + 1, res) < 0) {
+        return -1;
+    }
+
+    struct control_msghdr *hdr = (struct control_msghdr *) res;
+
+    if(hdr->msg_type == CREATE_ROOM_SUCC) {
+        printf("Created room: %s", room_name);
+    } else {
+        printf("Room create request failed: %s", (char *) hdr->msgdata);
+        return -1;
+    }
 
 	return 0;
 }

@@ -253,6 +253,50 @@ int create_receiver()
 
 int handle_register_req()
 {
+    int status;
+
+    /* Initialize TCP socket */
+    int tcp_socket_fd = socket(server_tcp_info->ai_family, server_tcp_info->ai_socktype, server_tcp_info->ai_protocol);
+
+    /* Connect to server */
+    if((status = connect(tcp_socket_fd, server_tcp_info->ai_addr, server_tcp_info->ai_addrlen)) != 0) {
+        perror("Error when connecting to chat server.");
+        return -1;
+    }
+
+    char buf[MAX_MSG_LEN];
+    memset(buf, 0, MAX_MSG_LEN);
+
+    struct control_msghdr *hdr = (struct control_msghdr *) buf;
+    /* DO NOT convert byte order for this value, server uses it directly */
+    hdr->msg_type = REGISTER_REQUEST;
+    hdr->msg_len = sizeof (struct control_msghdr)
+            + sizeof (struct register_msgdata) + strlen(member_name) + 1;
+
+    struct register_msgdata *data = (struct register_msgdata *) hdr->msgdata;
+    /* DO convert this value as it is used directly in network structs */
+    data->udp_port = htons(client_udp_port);
+    strcpy((char *) data->member_name, member_name);
+
+    /* Send packet to server */
+    send(tcp_socket_fd, buf, hdr->msg_len, 0);
+
+    /* Clear buffer */
+    memset(buf, 0 , MAX_MSG_LEN);
+
+    /* Read result from server */
+    recv(tcp_socket_fd, buf, MAX_MSG_LEN, 0);
+
+    if(hdr->msg_type == REGISTER_SUCC) {
+        TRACE("Successfully registered with server.");
+        member_id = hdr->member_id;
+    } else {
+        TRACE("Could not register with server!");
+        return -1;
+    }
+
+    /* Close TCP Connection to server */
+    close(tcp_socket_fd);
 
 	return 0;
 }
@@ -329,15 +373,6 @@ int init_client()
         return -1;
     }
 
-    /* Initialize TCP socket */
-    int tcp_socket_fd = socket(server_tcp_info->ai_family, server_tcp_info->ai_socktype, server_tcp_info->ai_protocol);
-
-    /* Connect to server */
-    if((status = connect(tcp_socket_fd, server_tcp_info->ai_addr, server_tcp_info->ai_addrlen)) != 0) {
-        perror("Error when connecting to chat server.");
-        return -1;
-    }
-
 	/* 2. initialization to allow UDP-based chat messages to chat server */
     char udp_port[MAX_HOST_NAME_LEN];
     sprintf(udp_port, "%d", server_udp_port);
@@ -358,42 +393,7 @@ int init_client()
     }
 
 	/* 4. register with chat server */
-    char buf[MAX_MSG_LEN];
-    memset(buf, 0, MAX_MSG_LEN);
-
-    struct control_msghdr *hdr = (struct control_msghdr *) buf;
-    /* DO NOT convert byte order for this value, server uses it directly */
-    hdr->msg_type = REGISTER_REQUEST;
-    hdr->msg_len = sizeof (struct control_msghdr)
-            + sizeof (struct register_msgdata) + strlen(member_name) + 1;
-
-    struct register_msgdata *data = (struct register_msgdata *) hdr->msgdata;
-    /* DO convert this value as it is used directly in network structs */
-    data->udp_port = htons(client_udp_port);
-    strcpy((char *) data->member_name, member_name);
-
-    /* Send packet to server */
-    send(tcp_socket_fd, buf, hdr->msg_len, 0);
-
-    /* Clear buffer */
-    memset(buf, 0 , MAX_MSG_LEN);
-
-    /* Read result from server */
-    recv(tcp_socket_fd, buf, MAX_MSG_LEN, 0);
-
-    if(hdr->msg_type == REGISTER_SUCC) {
-        TRACE("Successfully registered with server.");
-        member_id = hdr->member_id;
-    } else {
-        TRACE("Could not register with server!");
-        return -1;
-    }
-
-    /* Close TCP Connection to server */
-    close(tcp_socket_fd);
-
-	return 0;
-
+    return handle_register_req();
 }
 
 

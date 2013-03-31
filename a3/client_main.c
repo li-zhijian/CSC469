@@ -75,6 +75,9 @@ static void usage(char **argv) {
 	exit(1);
 }
 
+/* Function to be executed when control message received */
+typedef void (*ControlAction)(char *, struct control_msghdr *);
+
 void shutdown_clean() {
 	/* Function to clean up after ourselves on exit, freeing any 
 	 * used resources 
@@ -349,67 +352,55 @@ int handle_room_list_req()
 	return 0;
 }
 
-int handle_member_list_req(char *room_name)
-{
+int handle_room_request(char *room_name, uint16_t msg_type,
+        uint16_t succ_type,
+        ControlAction succ, ControlAction fail) {
     char res[MAX_MSG_LEN];
 
-    if(send_control_msg(MEMBER_LIST_REQUEST,
+    if(send_control_msg(msg_type,
             room_name, strlen(room_name) + 1, res) < 0) {
         return -1;
     }
 
     struct control_msghdr *hdr = (struct control_msghdr *) res;
 
-    if(hdr->msg_type == MEMBER_LIST_SUCC) {
-        printf("Members in room %s: %s", room_name, (char *) hdr->msgdata);
+    if(hdr->msg_type == succ_type) {
+        succ(room_name, hdr);
     } else {
-        printf("Member list request failed: %s", (char *) hdr->msgdata);
+        if(fail) {
+            fail(room_name, hdr);
+        } else {
+            printf("Request failed: %s", (char *) hdr->msgdata);
+        }
+
         return -1;
     }
 
-	return 0;
+    return 0;
 }
 
-int handle_switch_room_req(char *room_name)
-{
-    char res[MAX_MSG_LEN];
-
-    if(send_control_msg(SWITCH_ROOM_REQUEST,
-            room_name, strlen(room_name) + 1, res) < 0) {
-        return -1;
-    }
-
-    struct control_msghdr *hdr = (struct control_msghdr *) res;
-
-    if(hdr->msg_type == SWITCH_ROOM_SUCC) {
-        printf("Switched to room: %s", room_name);
-    } else {
-        printf("Room switch request failed: %s", (char *) hdr->msgdata);
-        return -1;
-    }
-
-	return 0;
+void member_list_succ(char *room_name, struct control_msghdr *hdr) {
+    printf("Members in room %s: %s", room_name, (char *) hdr->msgdata);
 }
 
-int handle_create_room_req(char *room_name)
-{
-    char res[MAX_MSG_LEN];
+int handle_member_list_req(char *room_name) {
+    return handle_room_request(room_name, MEMBER_LIST_REQUEST, MEMBER_LIST_SUCC, member_list_succ, NULL);
+}
 
-    if(send_control_msg(CREATE_ROOM_REQUEST,
-            room_name, strlen(room_name) + 1, res) < 0) {
-        return -1;
-    }
+void switch_room_succ(char *room_name, struct control_msghdr *hdr) {
+    printf("Switched to room: %s", room_name);
+}
 
-    struct control_msghdr *hdr = (struct control_msghdr *) res;
+int handle_switch_room_req(char *room_name) {
+    return handle_room_request(room_name, SWITCH_ROOM_REQUEST, SWITCH_ROOM_SUCC, switch_room_succ, NULL);
+}
 
-    if(hdr->msg_type == CREATE_ROOM_SUCC) {
-        printf("Created room: %s", room_name);
-    } else {
-        printf("Room create request failed: %s", (char *) hdr->msgdata);
-        return -1;
-    }
+void create_room_succ(char *room_name, struct control_msghdr *hdr) {
+    printf("Created room: %s", room_name);
+}
 
-	return 0;
+int handle_create_room_req(char *room_name) {
+    return handle_room_request(room_name, CREATE_ROOM_REQUEST, CREATE_ROOM_SUCC, create_room_succ, NULL);
 }
 
 

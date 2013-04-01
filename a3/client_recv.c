@@ -148,9 +148,8 @@ void init_receiver()
 
 void handle_received_msg(char *buf)
 {
-
-	/**** YOUR CODE HERE ****/
-
+    struct chat_msghdr *hdr = (struct chat_msghdr *) buf;
+    printf("%s: %s", hdr->sender.member_name, (char *) hdr->msgdata);
 }
 
 
@@ -171,14 +170,16 @@ void receive_msgs()
 
 	/* Initialize file descriptor sets for select */
 	fd_set rset;
+	fd_set allset;
 
 	/*
 	 * Should really use POSIX Message Queus so that we can monitor both
 	 * Socket and Queue using select. But since makefile doesn't link
 	 * against librt it is not possible to do so for this assignment.
 	 */
-	FD_ZERO(&rset); /* Clear Set */
-	FD_SET(udp_socket_fd, &rset);
+	FD_ZERO(&allset); /* Clear Sets */
+	FD_ZERO(&rset);
+	FD_SET(udp_socket_fd, &allset);
 
 	int maxfd = udp_socket_fd;
 
@@ -189,10 +190,18 @@ void receive_msgs()
 	    tv.tv_usec = 100 * 1000; /* 100 Milliseconds */
 
 	    /* Wait for one of the fd's to become active or timeout */
-	    if(select(maxfd + 1, &rset, NULL, NULL, &tv) != 0) {
+	    rset = allset;
+	    if(select(maxfd + 1, &rset, NULL, NULL, &tv) == -1) {
             perror("select");
             exit(1);
         }
+
+	    /* Check UDP Socket */
+	    if(FD_ISSET(udp_socket_fd, &rset)) {
+	        memset(buf, 0, MAX_MSG_LEN);
+	        recvfrom(udp_socket_fd, buf, MAX_MSG_LEN, 0, NULL, NULL);
+	        handle_received_msg(buf);
+	    }
 
 	    /* Check Message Queue */
         int result;

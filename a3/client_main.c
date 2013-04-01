@@ -217,7 +217,7 @@ int create_receiver()
 		msg_t msg;
 		result = msgrcv(ctrl2rcvr_qid, &msg, sizeof(struct body_s), CTRL_TYPE, IPC_NOWAIT);
 		if (result == -1 && errno == ENOMSG) {
-			usleep(100 * 1000); /* Sleep 100 milliseconds and retry */
+			usleep(500 * 1000); /* Sleep 500 milliseconds and retry */
 			numtries++;
 		} else if (result > 0) {
 			if (msg.body.status == RECV_READY) {

@@ -443,6 +443,9 @@ int init_client()
 	/* 0. Get server host name, port numbers from location server.
 	 *    See retrieve_chatserver_info() in client_util.c
 	 */
+    if(retrieve_chatserver_info(server_host_name, &server_tcp_port, &server_udp_port) == -1) {
+        return -1;
+    }
 
 #endif
  

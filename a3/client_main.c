@@ -488,22 +488,18 @@ void handle_chatmsg_input(char *inputdata)
 	 * struct and send the chat message to the chat server.
 	 */
 
-	char *buf = (char *)malloc(MAX_MSG_LEN);
-  
-	if (buf == 0) {
-		printf("Could not malloc memory for message buffer\n");
-		shutdown_clean();
-		exit(1);
-	}
+	char buf[MAX_MSG_LEN];
+	memset(buf, 0, MAX_MSG_LEN);
 
-	bzero(buf, MAX_MSG_LEN);
+	struct chat_msghdr *hdr = (struct chat_msghdr *) buf;
 
+	/* Initialize header */
+	hdr->sender.member_id = member_id;
+	hdr->msg_len = sizeof (struct chat_msghdr) + strlen(inputdata) + 1;
+	strcpy((char *) hdr->msgdata, inputdata);
 
-	/**** YOUR CODE HERE ****/
-
-
-	free(buf);
-	return;
+	/* Send packet to server */
+	sendto(udp_socket_fd, buf, hdr->msg_len, 0, server_udp_info->ai_addr, server_udp_info->ai_addrlen);
 }
 
 

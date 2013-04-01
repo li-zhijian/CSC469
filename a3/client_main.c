@@ -315,7 +315,7 @@ int handle_register_req()
     /* Calculate length */
     uint16_t data_len = sizeof (struct register_msgdata) + strlen(member_name) + 1;
 
-    if(send_control_msg(REGISTER_REQUEST, buf, data_len, res) < 0) {
+    if(send_control_msg(REGISTER_REQUEST, buf, data_len, res) <= 0) {
         return -1;
     }
 
@@ -336,7 +336,7 @@ int handle_room_list_req()
 {
     char res[MAX_MSG_LEN];
 
-    if(send_control_msg(ROOM_LIST_REQUEST, NULL, 0, res) < 0) {
+    if(send_control_msg(ROOM_LIST_REQUEST, NULL, 0, res) <= 0) {
         return -1;
     }
 
@@ -358,7 +358,7 @@ int handle_room_request(char *room_name, uint16_t msg_type,
     char res[MAX_MSG_LEN];
 
     if(send_control_msg(msg_type,
-            room_name, strlen(room_name) + 1, res) < 0) {
+            room_name, strlen(room_name) + 1, res) <= 0) {
         return -1;
     }
 

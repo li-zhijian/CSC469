@@ -272,7 +272,7 @@ int send_control_msg(uint16_t msg_type, char *data, uint16_t data_len, char *res
 
     /* Connect to server */
     if((status = connect(tcp_socket_fd, server_tcp_info->ai_addr, server_tcp_info->ai_addrlen)) != 0) {
-        perror("Error when connecting to chat server.");
+        perror("Error when connecting to chat server");
         return -1;
     }
 
@@ -479,7 +479,11 @@ int init_client()
     }
 
 	/* 4. register with chat server */
-    return handle_register_req();
+    if((status = handle_register_req()) != 0) {
+        shutdown_clean();
+    }
+
+    return status;
 }
 
 
@@ -677,7 +681,9 @@ int main(int argc, char **argv)
 
 #endif /* USE_LOCN_SERVER */
 
-	init_client();
+	if(init_client()< 0) {
+	    exit(-1);
+	}
 
 	get_user_input();
 

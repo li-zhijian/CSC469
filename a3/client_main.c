@@ -53,6 +53,7 @@ u_int16_t member_id = 0;
 pid_t receiver_pid;
 char ctrl2rcvr_fname[MAX_FILE_NAME_LEN];
 int ctrl2rcvr_qid;
+int receiver_created = 0;
 
 /* MAX_MSG_LEN is maximum size of a message, including header+body.
  * We define the maximum size of the msgdata field based on this.
@@ -172,8 +173,6 @@ int initialize_client_only_channel(int *qid)
 int create_receiver()
 {
     /* Only create receiver once */
-    static uint8_t receiver_created = 0;
-
     if(receiver_created) {
         TRACE("Receiver already created");
         return 0;
@@ -489,7 +488,7 @@ int init_client()
 
 	/* 4. register with chat server */
     if((status = handle_register_req()) != 0) {
-        shutdown_clean();
+        return -1;
     }
 
     return status;
@@ -722,7 +721,11 @@ int main(int argc, char **argv)
 
 #endif /* USE_LOCN_SERVER */
 
-	if(init_client()< 0) {
+	if(init_client() < 0) {
+	    if(receiver_created) {
+	        shutdown_clean();
+	    }
+
 	    exit(-1);
 	}
 

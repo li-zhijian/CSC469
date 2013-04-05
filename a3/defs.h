@@ -17,44 +17,44 @@
 #ifndef _DEFS_H
 #define _DEFS_H
 
-#define REGISTER_REQUEST 	1
-#define REGISTER_SUCC	 	2
-#define REGISTER_FAIL	 	3
+#define REGISTER_REQUEST     1
+#define REGISTER_SUCC         2
+#define REGISTER_FAIL         3
 
-#define ROOM_LIST_REQUEST	4 
-#define ROOM_LIST_SUCC 	        5 
-#define ROOM_LIST_FAIL	        6
+#define ROOM_LIST_REQUEST    4 
+#define ROOM_LIST_SUCC             5 
+#define ROOM_LIST_FAIL            6
 
-#define MEMBER_LIST_REQUEST	7
-#define MEMBER_LIST_SUCC	8
+#define MEMBER_LIST_REQUEST    7
+#define MEMBER_LIST_SUCC    8
 #define MEMBER_LIST_FAIL        9
 
-#define SWITCH_ROOM_REQUEST	10
-#define SWITCH_ROOM_SUCC	11
-#define SWITCH_ROOM_FAIL 	12	
+#define SWITCH_ROOM_REQUEST    10
+#define SWITCH_ROOM_SUCC    11
+#define SWITCH_ROOM_FAIL     12    
 
-#define CREATE_ROOM_REQUEST	13
-#define CREATE_ROOM_SUCC	14
-#define CREATE_ROOM_FAIL	15
+#define CREATE_ROOM_REQUEST    13
+#define CREATE_ROOM_SUCC    14
+#define CREATE_ROOM_FAIL    15
 
-#define MEMBER_KEEP_ALIVE	16
+#define MEMBER_KEEP_ALIVE    16
 
-#define QUIT_REQUEST		17	
+#define QUIT_REQUEST        17    
 
 /* maximum length of a member name */
-#define MAX_MEMBER_NAME_LEN     24	
+#define MAX_MEMBER_NAME_LEN     24    
 
 /* maximum length of a host name */
-#define MAX_HOST_NAME_LEN	80
+#define MAX_HOST_NAME_LEN    80
 
 /* maximum length of a file name */
-#define MAX_FILE_NAME_LEN	80
+#define MAX_FILE_NAME_LEN    80
 
 /* maximum length of a room name */
 #define MAX_ROOM_NAME_LEN       24 
 
 /* maximum number of rooms in one session */
-#define MAX_NUM_OF_ROOMS	40 
+#define MAX_NUM_OF_ROOMS    40 
 
 /* maximum number of members in one room */
 #define MAX_NUM_OF_MEMBERS_PER_ROOM  30
@@ -62,7 +62,7 @@
 #define MAX_NUM_OF_MEMBERS    (MAX_NUM_OF_ROOMS) * (MAX_NUM_OF_MEMBERS_PER_ROOM)
 
 /* maximum length of a message */
-#define MAX_MSG_LEN		2048	
+#define MAX_MSG_LEN        2048    
 
 
 /* data structures */
@@ -81,8 +81,8 @@ struct control_msghdr {
 
 struct chat_msghdr {
     union {
-    	char member_name[MAX_MEMBER_NAME_LEN];
-	u_int16_t member_id;
+        char member_name[MAX_MEMBER_NAME_LEN];
+    u_int16_t member_id;
     }sender;
     u_int16_t msg_len;
     caddr_t msgdata[0];

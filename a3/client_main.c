@@ -413,6 +413,17 @@ int handle_create_room_req(char *room_name) {
     return handle_room_request(room_name, CREATE_ROOM_REQUEST, CREATE_ROOM_SUCC, create_room_succ, NULL);
 }
 
+int handle_heartbeat_req() {
+    char res[MAX_MSG_LEN];
+
+    if(send_control_msg(ROOM_LIST_REQUEST, NULL, 0, res) <= 0) {
+        return NETWORK_ERROR;
+    }
+
+    /* Heartbeat successful */
+    return 0;
+}
+
 
 int handle_quit_req()
 {
@@ -612,6 +623,24 @@ int handle_command_input(char *line)
 	return result;
 }
 
+void reconnect_client() {
+    int status = 0;
+
+    do {
+        printf("\nReestablishing connection to server...\n");
+
+        status = init_client();
+
+        if(status == NETWORK_ERROR) {
+            printf("Waiting 5 seconds before next retry\n");
+            sleep(5);
+        } else if(status == INVALID_REQUEST) {
+            printf("Quitting because name already taken on new server\n");
+            shutdown_clean();
+        }
+    } while (status != 0);
+}
+
 void get_user_input()
 {
 	char buf[MAX_MSGDATA];
@@ -664,8 +693,10 @@ void get_user_input()
                 if (buf[len-1] == '\n') {
                     buf[len-1] = '\0';
                 }
-                handle_command_input(&buf[1]);
 
+                if(handle_command_input(&buf[1]) == NETWORK_ERROR) {
+                    reconnect_client();
+                }
             } else {
                 handle_chatmsg_input(buf);
             }
@@ -674,6 +705,12 @@ void get_user_input()
             printf("\n[%s]>  ", member_name);
         } else {
             /* Timed out, send heartbeat */
+            if(handle_heartbeat_req() == NETWORK_ERROR) {
+                reconnect_client();
+
+                /* Print out prompt */
+                printf("\n[%s]>  ", member_name);
+            }
         }
 	}
 }

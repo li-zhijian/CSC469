@@ -55,6 +55,11 @@ typedef struct msgbuf {
 #define BIND_FAILED   12
 #define NAME_FAILED   13
 
+/* Failure codes from command handlers */
+#define INVALID_COMMAND -1
+#define INVALID_REQUEST -2
+#define NETWORK_ERROR   -3
+
 
 extern char *optarg; /* For option parsing */
 

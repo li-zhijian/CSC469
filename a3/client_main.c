@@ -326,7 +326,7 @@ int handle_register_req()
     uint16_t data_len = sizeof (struct register_msgdata) + strlen(member_name) + 1;
 
     if(send_control_msg(REGISTER_REQUEST, buf, data_len, res) <= 0) {
-        return -1;
+        return NETWORK_ERROR;
     }
 
     struct control_msghdr *hdr = (struct control_msghdr *) res;
@@ -336,7 +336,7 @@ int handle_register_req()
         member_id = hdr->member_id;
     } else {
         printf("Could not register with server: %s", (char *) hdr->msgdata);
-        return -1;
+        return INVALID_REQUEST;
     }
 
 	return 0;
@@ -347,7 +347,7 @@ int handle_room_list_req()
     char res[MAX_MSG_LEN];
 
     if(send_control_msg(ROOM_LIST_REQUEST, NULL, 0, res) <= 0) {
-        return -1;
+        return NETWORK_ERROR;
     }
 
     struct control_msghdr *hdr = (struct control_msghdr *) res;
@@ -356,7 +356,7 @@ int handle_room_list_req()
         printf("%s", (char *) hdr->msgdata);
     } else {
         printf("Room list request failed: %s", (char *) hdr->msgdata);
-        return -1;
+        return INVALID_REQUEST;
     }
 
 	return 0;
@@ -369,7 +369,7 @@ int handle_room_request(char *room_name, uint16_t msg_type,
 
     if(send_control_msg(msg_type,
             room_name, strlen(room_name) + 1, res) <= 0) {
-        return -1;
+        return NETWORK_ERROR;
     }
 
     struct control_msghdr *hdr = (struct control_msghdr *) res;
@@ -383,7 +383,7 @@ int handle_room_request(char *room_name, uint16_t msg_type,
             printf("Request failed: %s", (char *) hdr->msgdata);
         }
 
-        return -1;
+        return INVALID_REQUEST;
     }
 
     return 0;
@@ -521,15 +521,15 @@ void handle_chatmsg_input(char *inputdata)
 /* This should be called with the leading "!" stripped off the original
  * input line.
  * 
- * You can change this function in any way you like.
+ * Returns 0 if successful otherwise error code.
  *
  */
-void handle_command_input(char *line)
+int handle_command_input(char *line)
 {
 	char cmd = line[0]; /* single character identifying which command */
 	int len = 0;
 	int goodlen = 0;
-	int result;
+	int result = 0;
 
 	line++; /* skip cmd char */
 
@@ -541,7 +541,7 @@ void handle_command_input(char *line)
 	case 'q':
 		if (strlen(line) != 0) {
 			printf("Error in command format: !%c should not be followed by anything.\n",cmd);
-			return;
+			return INVALID_COMMAND;
 		}
 		break;
 
@@ -553,7 +553,7 @@ void handle_command_input(char *line)
 
 			if (line[0] != ' ') {
 				printf("Error in command format: !%c should be followed by a space and a room name.\n",cmd);
-				return;
+				return INVALID_COMMAND;
 			}
 			line++; /* skip space before room name */
 
@@ -561,18 +561,18 @@ void handle_command_input(char *line)
 			goodlen = strcspn(line, " \t\n"); /* Any more whitespace in line? */
 			if (len != goodlen) {
 				printf("Error in command format: line contains extra whitespace (space, tab or carriage return)\n");
-				return;
+				return INVALID_COMMAND;
 			}
 			if (len > allowed_len) {
 				printf("Error in command format: name must not exceed %d characters.\n",allowed_len);
-				return;
+				return INVALID_COMMAND;
 			}
 		}
 		break;
 
 	default:
 		printf("Error: unrecognized command !%c\n",cmd);
-		return;
+		return INVALID_COMMAND;
 		break;
 	}
 
@@ -609,7 +609,7 @@ void handle_command_input(char *line)
 	 * You may want to change that.
 	 */
 
-	return;
+	return result;
 }
 
 void get_user_input()

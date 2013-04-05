@@ -452,7 +452,7 @@ int init_client()
 	 *    See retrieve_chatserver_info() in client_util.c
 	 */
     if(retrieve_chatserver_info(server_host_name, &server_tcp_port, &server_udp_port) == -1) {
-        return -1;
+        return NETWORK_ERROR;
     }
 
 #endif
@@ -464,7 +464,7 @@ int init_client()
     /* Get TCP server info */
     if((status = getaddrinfo(server_host_name, tcp_port, &tcp_hints, &server_tcp_info)) != 0) {
         perror("Error when getting TCP server info");
-        return -1;
+        return NETWORK_ERROR;
     }
 
 	/* 2. initialization to allow UDP-based chat messages to chat server */
@@ -474,7 +474,7 @@ int init_client()
     /* Get UDP server info */
     if((status = getaddrinfo(server_host_name, udp_port, &udp_hints, &server_udp_info)) != 0) {
         perror("Error when getting UDP server info");
-        return -1;
+        return NETWORK_ERROR;
     }
 
     /* Initialize UDP socket */
@@ -483,12 +483,12 @@ int init_client()
 	/* 3. spawn receiver process - see create_receiver() in this file. */
 
     if((status = create_receiver()) != 0) {
-        return -1;
+        return NETWORK_ERROR;
     }
 
 	/* 4. register with chat server */
     if((status = handle_register_req()) != 0) {
-        return -1;
+        return status;
     }
 
     return status;

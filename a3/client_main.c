@@ -602,7 +602,7 @@ void handle_command_input(char *line)
 
 void get_user_input()
 {
-	char *buf = (char *)malloc(MAX_MSGDATA);
+	char buf[MAX_MSGDATA];
 	char *result_str;
 
 	while(TRUE) {
@@ -632,9 +632,6 @@ void get_user_input()
 			handle_chatmsg_input(buf);
 		}
 	}
-
-	free(buf);
-  
 }
 
 

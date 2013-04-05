@@ -431,8 +431,6 @@ int init_client()
 {
 	/* Initialize client so that it is ready to start exchanging messages
 	 * with the chat server.
-	 *
-	 * YOUR CODE HERE
 	 */
     int status;
     struct addrinfo tcp_hints, udp_hints;
@@ -620,32 +618,64 @@ void get_user_input()
 	char buf[MAX_MSGDATA];
 	char *result_str;
 
+	/* Set up file descriptor sets to monitor */
+	fd_set rset;
+	fd_set allset;
+
+	/* Initialize sets */
+	FD_ZERO(&allset);
+    FD_ZERO(&rset);
+    FD_SET(STDIN_FILENO, &allset);
+
+    /* Disable buffering on stdout */
+    setbuf(stdout, NULL);
+
+    /* Print out initial Prompt */
+	printf("\n[%s]>  ", member_name);
+
 	while(TRUE) {
+        /* Initialize timeout */
+        struct timeval tv;
+        tv.tv_sec = 5; /* 5 Seconds */
+        tv.tv_usec = 0;
 
-		bzero(buf, MAX_MSGDATA);
+        /* Get input or timeout */
+        rset = allset;
+        if(select(STDIN_FILENO + 1, &rset, NULL, NULL, &tv) == -1) {
+            perror("select");
+            return;
+        }
 
-		printf("\n[%s]>  ",member_name);
+        if(FD_ISSET(STDIN_FILENO, &rset)) {
+            /* Clear buffer */
+            memset(buf, 0, MAX_MSGDATA);
 
-		result_str = fgets(buf,MAX_MSGDATA,stdin);
+            result_str = fgets(buf,MAX_MSGDATA,stdin);
 
-		if (result_str == NULL) {
-			printf("Error or EOF while reading user input.  Guess we're done.\n");
-			break;
-		}
+            if (result_str == NULL) {
+                printf("Error or EOF while reading user input.  Guess we're done.\n");
+                break;
+            }
 
-		/* Check if control message or chat message */
+            /* Check if control message or chat message */
 
-		if (buf[0] == '!') {
-			/* buf probably ends with newline.  If so, get rid of it. */
-			int len = strlen(buf);
-			if (buf[len-1] == '\n') {
-				buf[len-1] = '\0';
-			}
-			handle_command_input(&buf[1]);
-      
-		} else {
-			handle_chatmsg_input(buf);
-		}
+            if (buf[0] == '!') {
+                /* buf probably ends with newline.  If so, get rid of it. */
+                int len = strlen(buf);
+                if (buf[len-1] == '\n') {
+                    buf[len-1] = '\0';
+                }
+                handle_command_input(&buf[1]);
+
+            } else {
+                handle_chatmsg_input(buf);
+            }
+
+            /* Print out prompt */
+            printf("\n[%s]>  ", member_name);
+        } else {
+            /* Timed out, send heartbeat */
+        }
 	}
 }
 

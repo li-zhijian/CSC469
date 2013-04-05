@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/time.h>
 
 #include <netinet/in.h>
 #include <netdb.h>
@@ -22,6 +23,8 @@
 #include <errno.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
+#define HEARTBEAT_INTERVAL 5
 
 /*************** GLOBAL VARIABLES ******************/
 
@@ -659,16 +662,23 @@ void get_user_input()
     FD_ZERO(&rset);
     FD_SET(STDIN_FILENO, &allset);
 
+    /* Set up timers for heartbeat */
+    struct timeval start;
+    struct timeval now;
+
     /* Disable buffering on stdout */
     setbuf(stdout, NULL);
 
     /* Print out initial Prompt */
     printf("\n[%s]>  ", member_name);
 
+    /* Start timer */
+    gettimeofday(&start, NULL);
+
     while(TRUE) {
         /* Initialize timeout */
         struct timeval tv;
-        tv.tv_sec = 5; /* 5 Seconds */
+        tv.tv_sec = HEARTBEAT_INTERVAL; /* 5 Seconds */
         tv.tv_usec = 0;
 
         /* Get input or timeout */
@@ -707,14 +717,20 @@ void get_user_input()
 
             /* Print out prompt */
             printf("\n[%s]>  ", member_name);
-        } else {
-            /* Timed out, send heartbeat */
+        }
+
+        /* Send heartbeat roughly every 5 seconds */
+        gettimeofday(&now, NULL);
+        if(now.tv_sec - start.tv_sec >= HEARTBEAT_INTERVAL) {
             if(handle_heartbeat_req() == NETWORK_ERROR) {
                 reconnect_client();
 
                 /* Print out prompt */
                 printf("\n[%s]>  ", member_name);
             }
+
+            /* Reset Timer */
+            gettimeofday(&start, NULL);
         }
     }
 }

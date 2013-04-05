@@ -20,7 +20,7 @@
 
 #include "client.h"
 
-#ifdef DEBUG
+#ifdef DEBUG_LOCAL
 #define LOCATION_SERVER "localhost"
 #else
 #define LOCATION_SERVER "www.cdf.toronto.edu"

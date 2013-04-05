@@ -416,6 +416,16 @@ int handle_create_room_req(char *room_name) {
 int handle_heartbeat_req() {
     char res[MAX_MSG_LEN];
 
+    /**
+     * Using ROOM_LIST_REQUEST instead of MEMBER_KEEP_ALIVE, because
+     * the server doesn't handle MEMBER_KEEP_ALIVE and doesn't return anything.
+     * ROOM_LIST_REQUEST returns some data which verifies that the communication
+     * channel is working in both directions.
+     *
+     * This would not be efficient on a production environment because a ROOM_LIST
+     * request could potentially contain thousands of room names, thus over there
+     * using a dedicated heartbeat signal would be the right choice.
+     */
     if(send_control_msg(ROOM_LIST_REQUEST, NULL, 0, res) <= 0) {
         return NETWORK_ERROR;
     }

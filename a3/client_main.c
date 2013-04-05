@@ -171,6 +171,14 @@ int initialize_client_only_channel(int *qid)
 
 int create_receiver()
 {
+    /* Only create receiver once */
+    static uint8_t receiver_created = 0;
+
+    if(receiver_created) {
+        TRACE("Receiver already created");
+        return 0;
+    }
+
 	/* Create the receiver process using fork/exec and get the port number
 	 * that it is receiving chat messages on.
 	 */
@@ -241,6 +249,9 @@ int create_receiver()
 		waitpid(receiver_pid, &exitcode, 0);
 		printf("start of receiver failed, exited with code %d\n",exitcode);
 	}
+
+	/* Mark receiver as created */
+	receiver_created = 1;
 
 	return 0;
 }
